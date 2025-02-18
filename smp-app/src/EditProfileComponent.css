@@ -1,0 +1,35 @@
+/* Dark Mode for Edit Profile Component */
+.app-container.dark .edit-profile-container {
+  background: linear-gradient(135deg, #333, #444); /* Darker gradient */
+  color: #fff; /* White text */
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Light border */
+}
+
+/* Dark Mode for Buttons */
+.app-container.dark .save-button {
+  background-color: #4caf50;
+}
+
+.app-container.dark .cancel-button {
+  background-color: #e91e63;
+}
+
+.app-container.dark .save-button:hover {
+  background-color: #45a049;
+}
+
+.app-container.dark .cancel-button:hover {
+  background-color: #d81b60;
+}
+
+/* Additional dark mode tweaks */
+.app-container.dark .form-group input,
+.app-container.dark .form-group textarea {
+  background-color: #555;
+  border: 1px solid #777;
+  color: #fff;
+}
+
+.app-container.dark .overlay {
+  background-color: rgba(0, 0, 0, 0.7); /* Darker overlay for dark mode */
+}

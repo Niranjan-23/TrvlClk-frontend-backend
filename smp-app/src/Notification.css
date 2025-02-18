@@ -1,0 +1,64 @@
+/* Overall container styling */
+.notification-container {
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  max-width: 85%;
+  min-width: 60%;
+  min-height: 50%;
+  padding: 40px 30px;
+  margin-top: 100px;
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+/* Dark Mode Styling */
+.app-container.dark .notification-container {
+  background: rgba(50, 50, 50, 0.8);
+  color: #eee;
+  box-shadow: 0 2px 5px rgba(255, 255, 255, 0.1);
+}
+
+/* Notification Items */
+.notification-item {
+  display: flex;
+  align-items: center;
+  justify-content: flex;
+  padding: 10px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+.notification-item img{
+  width: auto;
+  padding-left: 0px;
+  display: flex;
+  justify-content: center;
+}
+
+/* Dark Mode for Notification Items */
+.app-container.dark .notification-item {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Ensuring Last Item Has No Border */
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+/* Avatar Styling */
+.avatar {
+  margin-right: 10px;
+  padding: 0px;
+}
+
+/* Name and Buttons Container */
+.notification-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-grow: 1;
+}
+
+/* Buttons Container */
+.button-group {
+  display: flex;
+  gap: 8px;
+}

@@ -1,0 +1,118 @@
+/* Vertical Sidebar Navigation */
+.nav-container {
+  width: 240px;
+  height: 100vh;
+  padding: 20px;
+  background-color: var(--nav-bg-light);
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  left: 0;
+  top: 0;
+  transition: background-color var(--transition);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  z-index: 200;
+}
+
+/* Dark Theme for Sidebar */
+.app-container.dark .nav-container {
+  background-color: var(--nav-bg-dark);
+}/* Vertical Sidebar Navigation */
+.nav-container {
+  width: 240px;
+  height: 100vh;
+  padding: 20px;
+  background-color: #f7f7f7;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  left: 0;
+  top: 0;
+  transition: background-color 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  z-index: 200;
+}
+
+/* Dark Theme for Sidebar */
+.app-container.dark .nav-container {
+  background-color: #1e1e1e;
+}
+
+/* Sidebar Title */
+.nav-title {
+  font-family: 'Lucida Handwriting', cursive;
+  font-size: 32px;
+  margin-bottom: 30px;
+  color: #6200ea;
+}
+
+/* Navigation Links Container */
+.nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  width: 100%;
+}
+
+/* Nav Button Styling: Flat (icon and text only, no background fill) */
+.nav-button {
+  background: none;
+  border: none;
+  text-transform: none;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: inherit;
+  width: 100%;
+  padding: 8px 0;
+  cursor: pointer;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.nav-button:hover {
+  color: #6200ea;
+  transform: translateX(5px);
+}
+
+
+/* Sidebar Title */
+.nav-title {
+  font-family: 'Lucida Handwriting', cursive;
+  font-size: 32px;
+  font-weight: bold;
+  margin: 30px;
+  color: var(--primary-color);
+}
+
+/* Navigation Links Container */
+.nav-links {
+  display: flex;
+  flex-direction: column;
+  margin-top: 30px;
+  gap: 70px;  /* Increased gap between buttons */
+  width: 100%;
+}
+
+/* Flat Nav Button Styling (icon and text only) */
+.nav-button {
+  background: none;
+  border: none;
+  text-transform: none;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;  /* Space between icon and text */
+  color: inherit;
+  width: 100%;
+  padding: 8px 0;
+  cursor: pointer;
+  transition: color var(--transition), transform var(--transition);
+}
+
+.nav-button:hover {
+  color: var(--primary-color);
+  transform: translateX(5px);
+}
