@@ -1,29 +1,28 @@
 import React, { useState } from "react";
-import "./EditProfileComponent.css"; // Updated styles
+import "./EditProfileComponent.css";
 
 const EditProfileComponent = ({ user, onClose, onSave }) => {
-  // Initialize state from the current user’s values.
-  const [name, setName] = useState(user.name);
-  const [bio, setBio] = useState(user.bio);
-  const [profilePicture, setProfilePicture] = useState(user.profileImage);
+  const [name, setName] = useState(user.name || "");
+  const [bio, setBio] = useState(user.bio || "");
+  const [profilePicture, setProfilePicture] = useState(user.profileImage || "");
 
-  const handleSave = () => {
-    const updatedUser = {
-      ...user,
-      name,
-      bio,
-      profileImage: profilePicture
-    };
-
-    // Save the updated user to localStorage
-    localStorage.setItem("loggedInUser", JSON.stringify(updatedUser));
-
-    // Optionally update the parent's state if the onSave callback is provided
-    if (onSave) {
-      onSave(updatedUser);
+  const handleSave = async () => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/user/${user._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, bio, profileImage: profilePicture }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        // onSave will update the Profile component state and localStorage.
+        onSave(data.user);
+      } else {
+        console.error("Error updating profile", data.error);
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error);
     }
-
-    // Close the edit overlay.
     onClose();
   };
 

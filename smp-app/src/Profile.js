@@ -4,64 +4,78 @@ import "./Profile.css";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 
-const Profile = ({ user }) => {
-  // Local state for the current user’s data.
+const Profile = ({ user, onUserUpdate }) => {
   const [localUser, setLocalUser] = useState(user);
   const [showEdit, setShowEdit] = useState(false);
-
-  // Update localUser when user prop changes.
+  const [isFollowing, setIsFollowing] = useState(false);
+  
+  // Fetch updated user data from the backend on mount or when user._id changes.
   useEffect(() => {
-    setLocalUser(user);
-  }, [user]);
-
-  // Listen for the custom "postAdded" event to update the profile instantly.
-  useEffect(() => {
-    const updateUserFromStorage = () => {
-      const storedUser = localStorage.getItem("loggedInUser");
-      if (storedUser && storedUser !== "undefined") {
-        setLocalUser(JSON.parse(storedUser));
+    const fetchUser = async () => {
+      if (user && user._id) {
+        try {
+          const response = await fetch(`http://localhost:5000/api/user/${user._id}`);
+          const data = await response.json();
+          if (response.ok) {
+            setLocalUser(data.user);
+            if (onUserUpdate) onUserUpdate(data.user);
+          } else {
+            console.error("Error fetching user", data.error);
+          }
+        } catch (error) {
+          console.error("Error fetching user", error);
+        }
       }
     };
+    fetchUser();
+  }, [user]);
 
-    window.addEventListener("postAdded", updateUserFromStorage);
-    return () => window.removeEventListener("postAdded", updateUserFromStorage);
-  }, []);
+  const handleEditClick = () => setShowEdit(true);
+  const handleCloseEdit = () => setShowEdit(false);
 
-  const handleEditClick = () => {
-    setShowEdit(true);
-  };
-
-  const handleCloseEdit = () => {
-    setShowEdit(false);
-  };
-
-  // Update local state and localStorage with the updated user.
+  // Update local state with the new user data after editing.
   const handleSaveProfile = (updatedUser) => {
     setLocalUser(updatedUser);
+    // Update localStorage (or global state) with the latest data.
     localStorage.setItem("loggedInUser", JSON.stringify(updatedUser));
+    if (onUserUpdate) onUserUpdate(updatedUser);
   };
 
-  // Delete a post from the user's posts array.
-  const handleDeletePost = (indexToDelete) => {
-    const updatedPosts = localUser.posts.filter((_, index) => index !== indexToDelete);
-    const updatedUser = { ...localUser, posts: updatedPosts };
-    setLocalUser(updatedUser);
-    localStorage.setItem("loggedInUser", JSON.stringify(updatedUser));
+  // Delete a post (calls the backend to update user posts)
+  const handleDeletePost = async (indexToDelete) => {
+    if (localUser && localUser._id) {
+      const updatedPosts = localUser.posts.filter((_, index) => index !== indexToDelete);
+      try {
+        const response = await fetch(`http://localhost:5000/api/user/${localUser._id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            posts: updatedPosts,
+            name: localUser.name,
+            bio: localUser.bio,
+            profileImage: localUser.profileImage
+          }),
+        });
+        const data = await response.json();
+        if (response.ok) {
+          setLocalUser(data.user);
+          localStorage.setItem("loggedInUser", JSON.stringify(data.user));
+        } else {
+          console.error("Error deleting post", data.error);
+        }
+      } catch (error) {
+        console.error("Error deleting post", error);
+      }
+    }
   };
 
-  if (!localUser) {
-    return <div className="profile-container">No user data available.</div>;
-  }
+  if (!localUser) return <div className="profile-container">No user data available.</div>;
 
   return (
     <div className="profile-container">
       <div className="profile-header">
         <div className="profile-image-wrapper">
-          <img
-            src={localUser.profileImage}
-            alt="Profile"
-            className="profile-image"
-          />
+          <img src={localUser.profileImage} alt="Profile" className="profile-image" />
         </div>
         <div className="profile-details">
           <h2 className="profile-name">{localUser.name}</h2>
@@ -72,10 +86,10 @@ const Profile = ({ user }) => {
               <strong>{localUser.posts.length}</strong> Posts
             </div>
             <div>
-              <strong>1.5k</strong> Followers
+              <strong>{localUser.followers.length}</strong> Followers
             </div>
             <div>
-              <strong>350</strong> Following
+              <strong>{localUser.following.length}</strong> Following
             </div>
           </div>
           <button onClick={handleEditClick} className="edit-profile-button">
@@ -83,15 +97,10 @@ const Profile = ({ user }) => {
           </button>
         </div>
       </div>
-
       <div className="post-grid">
         {localUser.posts.map((post, index) => (
           <div className="post-item" key={index} style={{ position: "relative" }}>
-            <img
-              src={post}
-              alt={`Post ${index + 1}`}
-              className="post-image"
-            />
+            <img src={post} alt={`Post ${index + 1}`} className="post-image" />
             <IconButton
               onClick={() => handleDeletePost(index)}
               style={{
@@ -108,7 +117,6 @@ const Profile = ({ user }) => {
           </div>
         ))}
       </div>
-
       {showEdit && (
         <EditProfileComponent
           user={localUser}

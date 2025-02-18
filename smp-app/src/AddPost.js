@@ -17,7 +17,7 @@ const VisuallyHiddenInput = styled("input")({
   width: 1,
 });
 
-export default function AddPost() {
+export default function AddPost({ user, onPostAdded }) {
   const [files, setFiles] = useState("");
 
   // Handle file selection.
@@ -27,21 +27,24 @@ export default function AddPost() {
     setFiles(URL.createObjectURL(image));
   };
 
-  // When "Post" is clicked, update loggedInUser's posts in localStorage.
-  const handlePost = () => {
-    if (files) {
-      const storedUser = localStorage.getItem("loggedInUser");
-      const userObj =
-        storedUser && storedUser !== "undefined"
-          ? JSON.parse(storedUser)
-          : null;
-      if (userObj) {
-        userObj.posts = userObj.posts ? userObj.posts : [];
-        // Append the new post (image URL string).
-        userObj.posts.push(files);
-        localStorage.setItem("loggedInUser", JSON.stringify(userObj));
-        // Dispatch a custom event to notify other components.
-        window.dispatchEvent(new Event("postAdded"));
+  // When "Post" is clicked, update the user’s posts via the backend.
+  const handlePost = async () => {
+    if (files && user && user._id) {
+      try {
+        const response = await fetch(`http://localhost:5000/api/user/${user._id}/posts`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ postUrl: files }),
+        });
+        const data = await response.json();
+        if (response.ok) {
+          // Notify the parent (e.g. Profile component) about the updated user.
+          onPostAdded(data.user);
+        } else {
+          console.error("Error adding post", data.error);
+        }
+      } catch (error) {
+        console.error("Error adding post:", error);
       }
       setFiles("");
     }
