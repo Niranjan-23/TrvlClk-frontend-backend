@@ -3,7 +3,7 @@ import { styled } from "@mui/material/styles";
 import Button from "@mui/material/Button";
 import BackupTwoToneIcon from "@mui/icons-material/BackupTwoTone";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
-import "./AddPost.css"; 
+import "./AddPost.css";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -17,64 +17,79 @@ const VisuallyHiddenInput = styled("input")({
   width: 1,
 });
 
-export default function AddPost({ user, onPostAdded }) {
-  const [files, setFiles] = useState("");
+export default function AddPost({ user, onPostAdded = () => {} }) {
+  const [previewUrl, setPreviewUrl] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
 
-  // Handle file selection.
-  const newPost = (event) => {
-    const image = event.target.files[0];
-    // Create a temporary URL for previewing the image.
-    setFiles(URL.createObjectURL(image));
+  // Prompt for an image URL
+  const handleUploadClick = () => {
+    const url = prompt("Enter Image URL:");
+    if (url && url.trim() !== "") {
+      setPreviewUrl(url);
+      setImageUrl(url);
+    }
   };
 
-  // When "Post" is clicked, update the user’s posts via the backend.
   const handlePost = async () => {
-    if (files && user && user._id) {
-      try {
-        const response = await fetch(`http://localhost:5000/api/user/${user._id}/posts`, {
+    console.log("handlePost triggered", { imageUrl, user });
+  
+    // Validate imageUrl and user ID
+    if (!imageUrl?.trim() || !user?._id) {
+      console.error("Image URL is empty or user ID is missing");
+      return;
+    }
+  
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/user/${user._id}/posts`,
+        {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ postUrl: files }),
-        });
-        const data = await response.json();
-        if (response.ok) {
-          // Notify the parent (e.g. Profile component) about the updated user.
-          onPostAdded(data.user);
-        } else {
-          console.error("Error adding post", data.error);
+          body: JSON.stringify({ imageUrl: imageUrl.trim() }), // Ensure imageUrl is sent
         }
-      } catch (error) {
-        console.error("Error adding post:", error);
+      );
+  
+      // Handle response
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error adding post:", errorData.error || "Unknown error");
+        return;
       }
-      setFiles("");
+  
+      const data = await response.json();
+      console.log("Post added successfully:", data.user);
+  
+      // Pass the updated user back to the parent
+      onPostAdded(data.user);
+  
+      // Reset states after posting
+      setPreviewUrl("");
+      setImageUrl("");
+    } catch (error) {
+      console.error("Error adding post:", error);
     }
   };
 
   return (
     <div className="add-container">
-      {files ? (
+      {previewUrl ? (
         <>
-          <img src={files} alt="Selected" />
+          <img src={previewUrl} alt="Selected" />
           <div className="post-button">
             <div>
               <Button
+                type="button"
                 size="medium"
-                component="label"
                 variant="contained"
-                tabIndex={-1}
                 startIcon={<FileUploadOutlinedIcon />}
+                onClick={handleUploadClick}
               >
                 Upload
-                <VisuallyHiddenInput
-                  type="file"
-                  onChange={newPost}
-                  multiple
-                  accept="image/*"
-                />
               </Button>
             </div>
             <div>
               <Button
+                type="button"
                 size="medium"
                 variant="contained"
                 startIcon={<BackupTwoToneIcon />}
@@ -87,21 +102,15 @@ export default function AddPost({ user, onPostAdded }) {
         </>
       ) : (
         <>
-          <h3>No Image is uploaded</h3>
+          <h3>No Image Uploaded</h3>
           <Button
+            type="button"
             size="small"
-            component="label"
             variant="contained"
-            tabIndex={-1}
             startIcon={<FileUploadOutlinedIcon />}
+            onClick={handleUploadClick}
           >
             Upload
-            <VisuallyHiddenInput
-              type="file"
-              onChange={newPost}
-              multiple
-              accept="image/*"
-            />
           </Button>
         </>
       )}

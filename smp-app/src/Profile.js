@@ -7,41 +7,23 @@ import DeleteIcon from "@mui/icons-material/Delete";
 const Profile = ({ user, onUserUpdate }) => {
   const [localUser, setLocalUser] = useState(user);
   const [showEdit, setShowEdit] = useState(false);
-  const [isFollowing, setIsFollowing] = useState(false);
-  
-  // Fetch updated user data from the backend on mount or when user._id changes.
+
+  // Sync localUser state with the incoming user prop
   useEffect(() => {
-    const fetchUser = async () => {
-      if (user && user._id) {
-        try {
-          const response = await fetch(`http://localhost:5000/api/user/${user._id}`);
-          const data = await response.json();
-          if (response.ok) {
-            setLocalUser(data.user);
-            if (onUserUpdate) onUserUpdate(data.user);
-          } else {
-            console.error("Error fetching user", data.error);
-          }
-        } catch (error) {
-          console.error("Error fetching user", error);
-        }
-      }
-    };
-    fetchUser();
+    setLocalUser(user);
   }, [user]);
 
   const handleEditClick = () => setShowEdit(true);
   const handleCloseEdit = () => setShowEdit(false);
 
-  // Update local state with the new user data after editing.
+  // Update profile after editing
   const handleSaveProfile = (updatedUser) => {
     setLocalUser(updatedUser);
-    // Update localStorage (or global state) with the latest data.
     localStorage.setItem("loggedInUser", JSON.stringify(updatedUser));
     if (onUserUpdate) onUserUpdate(updatedUser);
   };
 
-  // Delete a post (calls the backend to update user posts)
+  // Delete a post by updating the posts array
   const handleDeletePost = async (indexToDelete) => {
     if (localUser && localUser._id) {
       const updatedPosts = localUser.posts.filter((_, index) => index !== indexToDelete);
@@ -53,7 +35,7 @@ const Profile = ({ user, onUserUpdate }) => {
             posts: updatedPosts,
             name: localUser.name,
             bio: localUser.bio,
-            profileImage: localUser.profileImage
+            profileImage: localUser.profileImage,
           }),
         });
         const data = await response.json();
@@ -69,7 +51,8 @@ const Profile = ({ user, onUserUpdate }) => {
     }
   };
 
-  if (!localUser) return <div className="profile-container">No user data available.</div>;
+  if (!localUser)
+    return <div className="profile-container">No user data available.</div>;
 
   return (
     <div className="profile-container">

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Avatar from '@mui/material/Avatar';
 import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1';
 import Button from '@mui/material/Button';
@@ -8,26 +8,40 @@ import SearchIcon from '@mui/icons-material/Search';
 import './Search.css';
 
 export default function Search() {
-  const initialData = [
-    { name: "Paris", avatar: "https://images.pexels.com/photos/789555/pexels-photo-789555.jpeg" },
-    { name: "London", avatar: "https://images.pexels.com/photos/41162/moon-landing-apollo-11-nasa-buzz-aldrin-41162.jpeg" },
-    { name: "New York", avatar: "https://images.pexels.com/photos/30364871/pexels-photo-30364871.jpeg" },
-  ];
-
   const [searchQuery, setSearchQuery] = useState('');
-  const [profiles, setProfiles] = useState(initialData);
+  const [profiles, setProfiles] = useState([]);
 
-  const handleSearchChange = (event) => {
-    setSearchQuery(event.target.value);
+  // Fetch users from the server based on the search query.
+  const fetchUsers = async (query) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/search?query=${encodeURIComponent(query)}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch users');
+      }
+      const data = await response.json();
+      setProfiles(data.users || []);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      setProfiles([]); // Clear profiles on error
+    }
   };
 
-  const filteredProfiles = profiles.filter(profile =>
-    profile.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // On component mount, fetch default suggestions.
+  useEffect(() => {
+    fetchUsers(""); // With an empty query, the server returns default users.
+  }, []);
+
+  // Handle search input change.
+  const handleSearchChange = (event) => {
+    const query = event.target.value;
+    setSearchQuery(query);
+    // Fetch users whether query is empty or not—server will return defaults for empty.
+    fetchUsers(query);
+  };
 
   return (
     <div className="search-container">
-      <form>
+      <form onSubmit={(e) => e.preventDefault()}>
         <TextField
           id="search-bar"
           className="text"
@@ -43,9 +57,9 @@ export default function Search() {
         </IconButton>
       </form>
       <div className="profile-box">
-        {filteredProfiles.map((profile, index) => (
-          <div key={profile.name} className="profile-item">
-            <Avatar alt={profile.name} src={profile.avatar} className="avatar" />
+        {profiles.map((profile) => (
+          <div key={profile._id} className="profile-item">
+            <Avatar alt={profile.name} src={profile.profileImage} className="avatar" />
             <div className="profile-content">
               <span>{profile.name}</span>
               <div className="button-group">

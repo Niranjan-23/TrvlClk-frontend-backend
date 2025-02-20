@@ -28,7 +28,6 @@ const getLoggedInUserFromLocalStorage = () => {
   }
 };
 
-
 const getTokenFromLocalStorage = () => {
   return localStorage.getItem('token') || null;
 };
@@ -65,7 +64,7 @@ const App = () => {
     setIsDarkMode((prev) => !prev);
   };
 
-  // Local Route Components (for demonstration)
+  // Local Route Components
   const Home = () => (
     <div className="posts-container">
       <Post postId="post1" />
@@ -75,10 +74,16 @@ const App = () => {
 
   const NewPost = () => (
     <div className="posts-container">
-      <AddPost loggedInUser={loggedInUser} />
+      <AddPost 
+        user={loggedInUser} 
+        onPostAdded={(updatedUser) => {
+          setLoggedInUser(updatedUser);
+          localStorage.setItem('loggedInUser', JSON.stringify(updatedUser));
+        }}
+      />
     </div>
   );
-
+  
   const SearchProfile = () => (
     <div className="posts-container">
       <Search />
@@ -91,9 +96,16 @@ const App = () => {
     </div>
   );
 
+  // Pass onUserUpdate so Profile can update parent state if needed.
   const ProfileComp = () => (
     <div className="posts-container">
-      <Profile user={loggedInUser} />
+      <Profile 
+        user={loggedInUser} 
+        onUserUpdate={(updatedUser) => {
+          setLoggedInUser(updatedUser);
+          localStorage.setItem('loggedInUser', JSON.stringify(updatedUser));
+        }} 
+      />
     </div>
   );
 
