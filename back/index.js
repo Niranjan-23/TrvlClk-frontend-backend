@@ -16,9 +16,9 @@ app.use(
   })
 );
 
-// Connect to MongoDB Atlas
+// Connect to MongoDB Atlas (removed deprecated options)
 mongoose
-  .connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(process.env.MONGODB_URI)
   .then(() => console.log('MongoDB Connected'))
   .catch((err) => {
     console.error('MongoDB connection error:', err);
@@ -37,6 +37,7 @@ const userSchema = new mongoose.Schema(
     bio: { type: String, default: '', trim: true },
     followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    followRequests: { type: [mongoose.Schema.Types.ObjectId], ref: 'User', default: [] },
   },
   { timestamps: true }
 );
@@ -48,7 +49,8 @@ const handleDBError = (res, error) => {
   res.status(500).json({ error: 'Internal server error' });
 };
 
-// Signup route
+// ----- Authentication & User Data Endpoints -----
+
 app.post('/api/signup', async (req, res) => {
   try {
     const { email, username, password, name } = req.body;
@@ -62,7 +64,7 @@ app.post('/api/signup', async (req, res) => {
     const newUser = new User({
       email: email.toLowerCase(),
       username: username.toLowerCase(),
-      password, // NOTE: In production, hash the password!
+      password, // In production, hash this!
       name: name || username,
     });
     await newUser.save();
@@ -72,7 +74,6 @@ app.post('/api/signup', async (req, res) => {
   }
 });
 
-// Login route
 app.post('/api/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -86,7 +87,6 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// Get user data route
 app.get('/api/user/:id', async (req, res) => {
   try {
     const user = await User.findById(req.params.id)
@@ -99,7 +99,6 @@ app.get('/api/user/:id', async (req, res) => {
   }
 });
 
-// Update user route (for editing profile or deleting posts)
 app.put('/api/user/:id', async (req, res) => {
   try {
     const updates = Object.keys(req.body);
@@ -119,72 +118,229 @@ app.put('/api/user/:id', async (req, res) => {
   }
 });
 
-
-// Search users by name or username; if no query provided, return default suggestions.
-app.get('/api/search', async (req, res) => {
-  try {
-    let { query } = req.query;
-    if (!query || query.trim() === "") {
-      // Return default users (e.g., first 5 users)
-      const users = await User.find({}).limit(5).select('name username profileImage');
-      return res.status(200).json({ users });
-    }
-
-    // Otherwise, search by name or username (case-insensitive)
-    const users = await User.find({
-      $or: [
-        { name: { $regex: query, $options: 'i' } },
-        { username: { $regex: query, $options: 'i' } },
-      ],
-    }).select('name username profileImage');
-
-    res.status(200).json({ users });
-  } catch (error) {
-    console.error("Error in GET /api/search:", error);
-    handleDBError(res, error);
-  }
-});
-
-
+// ----- Content Endpoint -----
 
 app.post('/api/user/:id/posts', async (req, res) => {
   try {
-    console.log("Full Request Body:", req.body); // Log the entire request body
-
     const { imageUrl } = req.body;
-
-    // Validate imageUrl
-    if (!imageUrl || typeof imageUrl !== 'string' || imageUrl.trim() === "") {
-      console.error("Invalid or missing imageUrl:", imageUrl);
+    if (!imageUrl || typeof imageUrl !== 'string' || imageUrl.trim() === '') {
       return res.status(400).json({ error: 'A valid image URL is required' });
     }
-
-    // Validate user ID
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      console.error("Invalid user ID:", req.params.id);
       return res.status(400).json({ error: 'Invalid user ID' });
     }
-
-    // Update the user's posts array with the provided image URL
     const user = await User.findByIdAndUpdate(
       req.params.id,
-      { $push: { posts: imageUrl.trim() } }, // Trim whitespace
-      { new: true, runValidators: true } // Return updated document and validate schema
+      { $push: { posts: imageUrl.trim() } },
+      { new: true, runValidators: true }
     ).select('-password');
-
-    if (!user) {
-      console.error("User not found for ID:", req.params.id);
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    console.log("User after update:", user);
+    if (!user) return res.status(404).json({ error: 'User not found' });
     res.status(200).json({ user });
   } catch (error) {
-    console.error("Error in POST /api/user/:id/posts:", error);
     handleDBError(res, error);
   }
 });
-// Optional: Serve static files if needed
+
+// ----- Search Endpoint -----
+
+app.get('/api/search', async (req, res) => {
+  try {
+    const { query, excludeId } = req.query;
+    console.log('Search query:', query, 'excludeId:', excludeId); // Keep for debugging
+    const filter = query && query.trim() !== ''
+      ? {
+          $or: [
+            { name: { $regex: query, $options: 'i' } },
+            { username: { $regex: query, $options: 'i' } },
+          ],
+        }
+      : {};
+
+    if (excludeId && mongoose.Types.ObjectId.isValid(excludeId)) {
+      filter._id = { $ne: excludeId };
+      console.log('Excluding ID:', excludeId);
+    } else if (excludeId) {
+      console.log('Invalid excludeId:', excludeId);
+    }
+
+    const users = await User.find(filter)
+      .limit(query ? 10 : 5)
+      .select('name username profileImage');
+    res.status(200).json({ users });
+  } catch (error) {
+    console.error('Error in GET /api/search:', error);
+    handleDBError(res, error);
+  }
+});
+
+// ----- Follow/Unfollow Endpoints -----
+
+app.post('/api/user/:targetId/followRequest', async (req, res) => {
+  try {
+    const { requesterId } = req.body;
+    if (requesterId.toString() === req.params.targetId.toString()) {
+      return res.status(400).json({ error: 'You cannot follow yourself.' });
+    }
+    if (!requesterId || !mongoose.Types.ObjectId.isValid(requesterId)) {
+      return res.status(400).json({ error: 'Invalid requester ID' });
+    }
+    if (!mongoose.Types.ObjectId.isValid(req.params.targetId)) {
+      return res.status(400).json({ error: 'Invalid target ID' });
+    }
+    const targetUser = await User.findById(req.params.targetId);
+    if (!targetUser) return res.status(404).json({ error: 'Target user not found' });
+    if (targetUser.followRequests.map(id => id.toString()).includes(requesterId.toString())) {
+      return res.status(400).json({ error: 'Follow request already sent' });
+    }
+    targetUser.followRequests.push(requesterId);
+    await targetUser.save();
+    res.status(200).json({ message: 'Follow request sent', user: targetUser });
+  } catch (error) {
+    handleDBError(res, error);
+  }
+});
+
+app.get('/api/user/:id/followRequests', async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ error: 'Invalid user ID' });
+    }
+    const user = await User.findById(req.params.id)
+      .populate('followRequests', 'name username profileImage');
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.status(200).json({ followRequests: user.followRequests });
+  } catch (error) {
+    handleDBError(res, error);
+  }
+});
+
+app.post('/api/user/:id/followRequest/accept', async (req, res) => {
+  try {
+    const { requesterId } = req.body;
+    if (!requesterId || !mongoose.Types.ObjectId.isValid(requesterId)) {
+      return res.status(400).json({ error: 'Invalid requester ID' });
+    }
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ error: 'Invalid user ID' });
+    }
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    user.followRequests = user.followRequests.filter(id => id.toString() !== requesterId.toString());
+    if (!user.followers.map(id => id.toString()).includes(requesterId.toString())) {
+      user.followers.push(requesterId);
+    }
+    await user.save();
+
+    const requester = await User.findById(requesterId);
+    if (requester && !requester.following.map(id => id.toString()).includes(req.params.id.toString())) {
+      requester.following.push(req.params.id);
+      await requester.save();
+    }
+
+    const updatedUser = await User.findById(req.params.id)
+      .populate('followers following', 'username name profileImage')
+      .select('-password');
+    res.status(200).json({
+      message: 'Follow request accepted. Please click "Follow Back" to complete the process.',
+      user: updatedUser,
+    });
+  } catch (error) {
+    handleDBError(res, error);
+  }
+});
+
+app.post('/api/user/:id/followRequest/reject', async (req, res) => {
+  try {
+    const { requesterId } = req.body;
+    if (!requesterId || !mongoose.Types.ObjectId.isValid(requesterId)) {
+      return res.status(400).json({ error: 'Invalid requester ID' });
+    }
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ error: 'Invalid user ID' });
+    }
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    user.followRequests = user.followRequests.filter(id => id.toString() !== requesterId.toString());
+    await user.save();
+
+    const updatedUser = await User.findById(req.params.id)
+      .populate('followers following', 'username name profileImage')
+      .select('-password');
+    res.status(200).json({ message: 'Follow request rejected', user: updatedUser });
+  } catch (error) {
+    handleDBError(res, error);
+  }
+});
+
+app.post('/api/user/:id/followBack', async (req, res) => {
+  try {
+    const { requesterId } = req.body;
+    if (!requesterId || !mongoose.Types.ObjectId.isValid(requesterId)) {
+      return res.status(400).json({ error: 'Invalid requester ID' });
+    }
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ error: 'Invalid user ID' });
+    }
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    user.followRequests = user.followRequests.filter(id => id.toString() !== requesterId.toString());
+    if (!user.following.map(id => id.toString()).includes(requesterId.toString())) {
+      user.following.push(requesterId);
+    }
+    await user.save();
+
+    const requester = await User.findById(requesterId);
+    if (requester && !requester.followers.map(id => id.toString()).includes(req.params.id.toString())) {
+      requester.followers.push(req.params.id);
+      await requester.save();
+    }
+
+    const updatedUser = await User.findById(req.params.id)
+      .populate('followers following', 'username name profileImage')
+      .select('-password');
+    res.status(200).json({ message: 'Followed back successfully', user: updatedUser });
+  } catch (error) {
+    handleDBError(res, error);
+  }
+});
+
+app.post('/api/user/:targetId/unfollow', async (req, res) => {
+  try {
+    const { followerId } = req.body;
+    if (!followerId || !mongoose.Types.ObjectId.isValid(followerId)) {
+      return res.status(400).json({ error: 'Invalid follower ID' });
+    }
+    if (!mongoose.Types.ObjectId.isValid(req.params.targetId)) {
+      return res.status(400).json({ error: 'Invalid target ID' });
+    }
+    if (followerId.toString() === req.params.targetId.toString()) {
+      return res.status(400).json({ error: 'You cannot unfollow yourself.' });
+    }
+    const targetUser = await User.findById(req.params.targetId);
+    if (!targetUser) return res.status(404).json({ error: 'Target user not found' });
+    targetUser.followers = targetUser.followers.filter(id => id.toString() !== followerId.toString());
+    await targetUser.save();
+
+    const followerUser = await User.findById(followerId);
+    if (!followerUser) return res.status(404).json({ error: 'Follower user not found' });
+    followerUser.following = followerUser.following.filter(
+      id => id.toString() !== req.params.targetId.toString()
+    );
+    await followerUser.save();
+
+    const updatedFollowerUser = await User.findById(followerId)
+      .populate('followers following', 'username name profileImage')
+      .select('-password');
+    res.status(200).json({ message: 'Unfollowed successfully', user: updatedFollowerUser });
+  } catch (error) {
+    handleDBError(res, error);
+  }
+});
+
+// ----- Serve Static Files -----
 app.use(express.static('public'));
 
 app.listen(PORT, () => {

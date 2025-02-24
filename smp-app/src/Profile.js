@@ -8,22 +8,42 @@ const Profile = ({ user, onUserUpdate }) => {
   const [localUser, setLocalUser] = useState(user);
   const [showEdit, setShowEdit] = useState(false);
 
-  // Sync localUser state with the incoming user prop
+  // Sync localUser with incoming user prop
   useEffect(() => {
     setLocalUser(user);
+  }, [user]);
+
+  // Fetch latest user data on update
+  const fetchCurrentUser = async () => {
+    if (!user || !user._id) return;
+    try {
+      const response = await fetch(`http://localhost:5000/api/user/${user._id}`);
+      if (!response.ok) throw new Error('Failed to fetch user');
+      const data = await response.json();
+      setLocalUser(data.user);
+      localStorage.setItem('loggedInUser', JSON.stringify(data.user));
+    } catch (error) {
+      console.error('Error fetching current user:', error);
+    }
+  };
+
+  useEffect(() => {
+    const handleUserUpdate = () => {
+      fetchCurrentUser();
+    };
+    window.addEventListener('userUpdated', handleUserUpdate);
+    return () => window.removeEventListener('userUpdated', handleUserUpdate);
   }, [user]);
 
   const handleEditClick = () => setShowEdit(true);
   const handleCloseEdit = () => setShowEdit(false);
 
-  // Update profile after editing
   const handleSaveProfile = (updatedUser) => {
     setLocalUser(updatedUser);
     localStorage.setItem("loggedInUser", JSON.stringify(updatedUser));
     if (onUserUpdate) onUserUpdate(updatedUser);
   };
 
-  // Delete a post by updating the posts array
   const handleDeletePost = async (indexToDelete) => {
     if (localUser && localUser._id) {
       const updatedPosts = localUser.posts.filter((_, index) => index !== indexToDelete);
