@@ -1,3 +1,15 @@
+/* Fade In Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Overall container styling */
 .notification-container {
   background: rgba(255, 255, 255, 0.7);
@@ -22,13 +34,15 @@
 .notification-item {
   display: flex;
   align-items: center;
-  justify-content: flex;
+  /* Adjusted justify-content to flex-start */
+  justify-content: flex-start;
   padding: 10px 0;
   border-bottom: 1px solid #e0e0e0;
 }
-.notification-item img{
+
+.notification-item img {
   width: auto;
-  padding-left: 0px;
+  padding-left: 0;
   display: flex;
   justify-content: center;
 }
@@ -46,7 +60,7 @@
 /* Avatar Styling */
 .avatar {
   margin-right: 10px;
-  padding: 0px;
+  padding: 0;
 }
 
 /* Name and Buttons Container */
@@ -57,8 +71,8 @@
   flex-grow: 1;
 }
 
-/* Buttons Container */
+/* Buttons Container with increased gap */
 .button-group {
   display: flex;
-  gap: 8px;
+  gap: 12px; /* Increased gap for better spacing */
 }

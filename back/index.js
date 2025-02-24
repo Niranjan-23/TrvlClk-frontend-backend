@@ -16,7 +16,7 @@ app.use(
   })
 );
 
-// Connect to MongoDB Atlas (removed deprecated options)
+// Connect to MongoDB Atlas
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => console.log('MongoDB Connected'))
@@ -64,11 +64,12 @@ app.post('/api/signup', async (req, res) => {
     const newUser = new User({
       email: email.toLowerCase(),
       username: username.toLowerCase(),
-      password, // In production, hash this!
+      password, // In production, hash the password!
       name: name || username,
     });
     await newUser.save();
-    res.status(201).json({ user: newUser });
+    const token = 'dummy-token'; // Replace with real token generation
+    res.status(201).json({ user: newUser, token });
   } catch (error) {
     handleDBError(res, error);
   }
@@ -81,7 +82,8 @@ app.post('/api/login', async (req, res) => {
     if (!user || user.password !== password) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
-    res.json({ user });
+    const token = 'dummy-token';
+    res.json({ user, token });
   } catch (error) {
     handleDBError(res, error);
   }
@@ -146,7 +148,7 @@ app.post('/api/user/:id/posts', async (req, res) => {
 app.get('/api/search', async (req, res) => {
   try {
     const { query, excludeId } = req.query;
-    console.log('Search query:', query, 'excludeId:', excludeId); // Keep for debugging
+    console.log('Search query:', query, 'excludeId:', excludeId);
     const filter = query && query.trim() !== ''
       ? {
           $or: [
@@ -173,8 +175,45 @@ app.get('/api/search', async (req, res) => {
   }
 });
 
-// ----- Follow/Unfollow Endpoints -----
+// ----- Timeline Endpoint -----
+// Returns posts (image URLs) from users that the current user follows.
+// Each timeline post object has: username, profileImage, imageUrl
+app.get('/api/timeline', async (req, res) => {
+  try {
+    const { userId } = req.query;
+    console.log('Timeline request for userId:', userId);
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ error: 'Invalid user id' });
+    }
+    const currentUser = await User.findById(userId);
+    if (!currentUser) return res.status(404).json({ error: 'User not found' });
+    
+    console.log('Current user following:', currentUser.following);
+    const followedUsers = await User.find({ _id: { $in: currentUser.following } })
+      .select('posts username profileImage');
+    
+    console.log('Followed Users:', followedUsers);
+    
+    let timelinePosts = [];
+    followedUsers.forEach(user => {
+      user.posts.forEach(postUrl => {
+        timelinePosts.push({
+          username: user.username,
+          profileImage: user.profileImage,
+          imageUrl: postUrl
+        });
+      });
+    });
+    
+    console.log('Timeline Posts:', timelinePosts);
+    res.status(200).json({ posts: timelinePosts });
+  } catch (error) {
+    handleDBError(res, error);
+  }
+});
 
+// ----- Follow/Unfollow Endpoints -----
+// (Unchanged from your original code)
 app.post('/api/user/:targetId/followRequest', async (req, res) => {
   try {
     const { requesterId } = req.body;
@@ -226,7 +265,9 @@ app.post('/api/user/:id/followRequest/accept', async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    user.followRequests = user.followRequests.filter(id => id.toString() !== requesterId.toString());
+    user.followRequests = user.followRequests.filter(
+      id => id.toString() !== requesterId.toString()
+    );
     if (!user.followers.map(id => id.toString()).includes(requesterId.toString())) {
       user.followers.push(requesterId);
     }
@@ -262,7 +303,9 @@ app.post('/api/user/:id/followRequest/reject', async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    user.followRequests = user.followRequests.filter(id => id.toString() !== requesterId.toString());
+    user.followRequests = user.followRequests.filter(
+      id => id.toString() !== requesterId.toString()
+    );
     await user.save();
 
     const updatedUser = await User.findById(req.params.id)
@@ -286,7 +329,9 @@ app.post('/api/user/:id/followBack', async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    user.followRequests = user.followRequests.filter(id => id.toString() !== requesterId.toString());
+    user.followRequests = user.followRequests.filter(
+      id => id.toString() !== requesterId.toString()
+    );
     if (!user.following.map(id => id.toString()).includes(requesterId.toString())) {
       user.following.push(requesterId);
     }
@@ -321,7 +366,9 @@ app.post('/api/user/:targetId/unfollow', async (req, res) => {
     }
     const targetUser = await User.findById(req.params.targetId);
     if (!targetUser) return res.status(404).json({ error: 'Target user not found' });
-    targetUser.followers = targetUser.followers.filter(id => id.toString() !== followerId.toString());
+    targetUser.followers = targetUser.followers.filter(
+      id => id.toString() !== followerId.toString()
+    );
     await targetUser.save();
 
     const followerUser = await User.findById(followerId);

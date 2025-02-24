@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import Nav from './Nav';
 import Post from './Post';
@@ -17,9 +17,7 @@ import { Avatar } from '@mui/material';
 // Helper functions to retrieve data from localStorage
 const getLoggedInUserFromLocalStorage = () => {
   const user = localStorage.getItem('loggedInUser');
-  if (!user || user === "undefined") {
-    return null;
-  }
+  if (!user || user === "undefined") return null;
   try {
     return JSON.parse(user);
   } catch (error) {
@@ -28,16 +26,13 @@ const getLoggedInUserFromLocalStorage = () => {
   }
 };
 
-const getTokenFromLocalStorage = () => {
-  return localStorage.getItem('token') || null;
-};
+const getTokenFromLocalStorage = () => localStorage.getItem('token') || null;
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(!!getTokenFromLocalStorage());
   const [loggedInUser, setLoggedInUser] = useState(getLoggedInUserFromLocalStorage());
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // Handle login by storing token and user data in localStorage
   const handleLogin = (token, user) => {
     setLoggedInUser(user);
     setIsLoggedIn(true);
@@ -45,7 +40,6 @@ const App = () => {
     localStorage.setItem('loggedInUser', JSON.stringify(user));
   };
 
-  // Handle signup similarly
   const handleSignUp = (token, user) => {
     setLoggedInUser(user);
     setIsLoggedIn(true);
@@ -61,22 +55,54 @@ const App = () => {
   };
 
   const toggleTheme = () => {
-    setIsDarkMode((prev) => !prev);
+    setIsDarkMode(prev => !prev);
   };
 
-  // Local Route Components
-  const Home = () => (
-    <div className="posts-container">
-      <Post postId="post1" />
-      <Post postId="post2" />
-    </div>
-  );
+  // Home component: Fetch timeline posts (from followed users)
+  const Home = () => {
+    const [timelinePosts, setTimelinePosts] = useState([]);
+
+    useEffect(() => {
+      const fetchTimeline = async () => {
+        try {
+          const url = `http://localhost:5000/api/timeline?userId=${loggedInUser._id}`;
+          console.log('Fetching timeline from:', url);
+          const response = await fetch(url);
+          if (response.ok) {
+            const data = await response.json();
+            console.log('Timeline posts:', data.posts);
+            setTimelinePosts(data.posts || []);
+          } else {
+            console.error('Failed to fetch timeline posts:', response.status);
+          }
+        } catch (error) {
+          console.error('Error fetching timeline posts:', error);
+        }
+      };
+      if (loggedInUser && loggedInUser._id) {
+        fetchTimeline();
+      }
+    }, [loggedInUser]);
+
+    return (
+      <div className="posts-container">
+        {timelinePosts.length > 0 ? (
+          timelinePosts.map((post, index) => (
+            // Pass the timeline post's imageUrl as the postId so that the original Post interface is maintained.
+            <Post key={index} postId={post.imageUrl} />
+          ))
+        ) : (
+          <p>No posts to display</p>
+        )}
+      </div>
+    );
+  };
 
   const NewPost = () => (
     <div className="posts-container">
       <AddPost 
-        user={loggedInUser} 
-        onPostAdded={(updatedUser) => {
+        user={loggedInUser}
+        onPostAdded={updatedUser => {
           setLoggedInUser(updatedUser);
           localStorage.setItem('loggedInUser', JSON.stringify(updatedUser));
         }}
@@ -96,15 +122,14 @@ const App = () => {
     </div>
   );
 
-  // Pass onUserUpdate so Profile can update parent state if needed.
   const ProfileComp = () => (
     <div className="posts-container">
       <Profile 
-        user={loggedInUser} 
-        onUserUpdate={(updatedUser) => {
+        user={loggedInUser}
+        onUserUpdate={updatedUser => {
           setLoggedInUser(updatedUser);
           localStorage.setItem('loggedInUser', JSON.stringify(updatedUser));
-        }} 
+        }}
       />
     </div>
   );
