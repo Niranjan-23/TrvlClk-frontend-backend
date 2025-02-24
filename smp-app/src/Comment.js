@@ -1,18 +1,17 @@
+// Comment.jsx (unchanged from your provided code)
 import React, { useState, useEffect } from 'react';
 import { Avatar, Grid, Paper, Divider, TextField, Button } from '@mui/material';
 import './Comment.css';
 import SendIcon from '@mui/icons-material/Send';
 
-// Helper function to get the logged-in user (assuming it's stored in localStorage)
 const getLoggedInUser = () => {
   const user = JSON.parse(localStorage.getItem('loggedInUser'));
-  console.log('Logged-in user:', user); // Debugging the logged-in user data
-  return user || { name: 'Guest User', avatar: 'https://via.placeholder.com/150' }; // Fallback values
+  console.log('Logged-in user:', user);
+  return user || { name: 'Guest User', avatar: 'https://via.placeholder.com/150' };
 };
 
 export default function Comment() {
-  const loggedInUser = getLoggedInUser(); // Get the logged-in user
-  console.log('Logged-in user in comment component:', loggedInUser); // Debugging
+  const loggedInUser = getLoggedInUser();
 
   const [comments, setComments] = useState([
     {
@@ -20,15 +19,15 @@ export default function Comment() {
       author: 'Michel Michel',
       text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean luctus ut est sed faucibus.',
       time: 'posted 1 minute ago',
-      avatar: 'https://via.placeholder.com/150', // Example avatar for Michel
+      avatar: 'https://via.placeholder.com/150',
     },
     {
       id: 2,
       author: 'Michel Michel',
       text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean luctus ut est sed faucibus.',
       time: 'posted 1 minute ago',
-      avatar: 'https://via.placeholder.com/150', // Example avatar for Michel
-    }
+      avatar: 'https://via.placeholder.com/150',
+    },
   ]);
   
   const [newComment, setNewComment] = useState('');
@@ -38,21 +37,19 @@ export default function Comment() {
 
     const newCommentObj = {
       id: comments.length + 1,
-      author: loggedInUser.name,  // Use logged-in user's name
+      author: loggedInUser.name,
       text: newComment,
       time: 'just now',
-      avatar: loggedInUser.avatar,  // Use logged-in user's avatar
+      avatar: loggedInUser.avatar,
     };
 
     setComments([...comments, newCommentObj]);
-    setNewComment('');  // Clear the input field
+    setNewComment('');
   };
 
   return (
     <div style={{ padding: 14 }} className="comment-box">
       <h1>Comments</h1>
-
-      {/* Display existing comments */}
       {comments.map((comment) => (
         <Paper key={comment.id} style={{ padding: '40px 20px', animation: 'fadeIn 0.5s' }}>
           <Grid container wrap="nowrap" spacing={2}>
@@ -68,8 +65,6 @@ export default function Comment() {
           <Divider variant="fullWidth" style={{ margin: '30px 0' }} />
         </Paper>
       ))}
-
-      {/* Comment input area */}
       <Paper style={{ padding: '20px', marginTop: '20px' }}>
         <Grid container spacing={2} alignItems="center">
           <Grid item xs>

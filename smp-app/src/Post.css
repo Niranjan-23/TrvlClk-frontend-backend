@@ -1,68 +1,99 @@
+/* Post.css */
+.post-wrapper {
+  display: flex;
+  width: fit-content; /* Adjusts to content width */
+  max-width: 800px; /* Maximum width when comments are shown */
+  margin: 20px auto;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  animation: slideUp 0.5s ease-out;
+}
+
 .post-container {
-  position: relative;
-  display: flex; /* Use flex layout for positioning elements */
-  align-items: flex-start; /* Align post content to the top */
-  animation: fadeIn 0.8s ease-in-out;
+  width: 400px; /* Fixed width for the post content */
 }
 
-.post {
-  background: rgba(255, 255, 255, 0.7);
-  padding: 15px;
-  margin: 10px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+.post-content {
+  width: 100%;
+}
+
+.post-content img {
+  width: 400px; /* Ensure square image */
+  height: 400px;
+  object-fit: cover;
+  display: block;
+  padding-left: 0%;
+}
+
+.action-bar {
   display: flex;
-  flex-direction: column;  /* Ensures content flows from top to bottom */
-  height: 450px;
-  width: 450px;
-  transition: filter 0.4s ease;
-  overflow: hidden;  /* Prevents content from overflowing outside the post */
-}
-
-.post.blurred {
-  filter: blur(5px);
-}
-
-.item1 {
-  flex: 0 0 90%;
-}
-
-.item2 {
-  align-items: end;
-  flex: 0 0 10%;
-  display: flex;
-  flex-direction: row;
-  gap: 40px;
-  padding-left: 30px;
-}
-
-.post img {
-  height: 90%;
-  width: 90%;
+  justify-content: space-between;
   align-items: center;
-  padding-left: 20px;
-  padding-top: 5px;
-  margin-left: 10px;
-  border-radius: 2%;
+  padding: 0px 15px;
 }
 
-/* Position the comment box to the right of the post */
-.comments-section {
-  position: absolute;
-  right: 30%;  /* Adjust the right position to align properly */
-  left:20%;
-  top: 10%;    /* Adjust the top margin for alignment */
-  bottom: 15%;
-  width: 300px;  /* Set the width of the comment box */
-  background-color: #fff; /* Ensure the background of the comment section matches the post */
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
-  padding: 15px;
-  overflow-y: auto;   /* Enable scrolling if there are too many comments */
-  max-height: 420px;  /* Limit height for better control */
+.action-buttons {
+  display: flex;
+  gap: 15px;
 }
 
-.like-count{
-  color: rgba(204, 89, 89, 0.793);
-  font-weight: bold;
+.action-btn {
+  min-width: unset !important;
+  padding: 6px !important;
+  color: #666 !important;
+}
+
+.action-btn:hover {
+  background: #f5f5f5 !important;
+}
+
+.count {
+  margin-left: 5px;
+  color: #e91e63;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.profile-btn {
+  min-width: unset !important;
+  padding: 6px !important;
+  color: #666 !important;
+  text-transform: none !important;
+  display: flex;
+  align-items: center;
+}
+
+.profile-name {
+  margin-left: 6px;
+  font-size: 12px; /* Smaller size */
+  font-weight: 500;
+}
+
+.avatar {
+  width: 30px; /* Matches sx prop in JSX */
+  height: 30px;
+}
+
+.comment-area {
+  width: 400px; /* Fixed width for comments */
+  padding: 25px;
+  overflow-y: auto;
+  height: 465px; /* Matches post height (400px image + 48px action bar) */
+  border-left: 1px solid #eee; /* Visual separation */
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.comment-area::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, and Opera */
 }

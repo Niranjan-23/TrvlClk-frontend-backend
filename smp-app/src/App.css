@@ -1,3 +1,5 @@
+/* App.css */
+
 /* Global Styles */
 body, html {
   margin: 0;
@@ -8,10 +10,6 @@ body, html {
 }
 
 .main-content::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, and Opera */
-}
-
-.comments-section::-webkit-scrollbar {
   display: none; /* Chrome, Safari, and Opera */
 }
 
@@ -30,17 +28,28 @@ body, html {
 .app-container.light .main-content {
   background-color: #f6f9fc;
 }
-.app-container.light .post {
+.app-container.light .post-wrapper {
   background: rgba(255, 255, 255, 0.8);
   color: #333;
 }
-.app-container.light .comments-section {
-  background-color: #fff;
+.app-container.light .action-bar {
+  background: #fff;
+}
+.app-container.light .profile-name {
   color: #333;
 }
-.app-container.light .toolbar button {
-  /* Use your preferred color for light mode buttons */
+.app-container.light .comment-area {
+  background-color: #fafafa;
   color: #333;
+}
+.app-container .toolbar{
+  color: #ffffff;
+}
+.app-container.light .profile-container {
+  background: #fff;
+}
+.app-container.light .edit-profile-container {
+  background: linear-gradient(135deg, #ffffff, #f0f0f0);
 }
 
 /* Dark Theme */
@@ -51,33 +60,42 @@ body, html {
 .app-container.dark .main-content {
   background-color: #2c2c2c;
 }
-.app-container.dark .post {
-  background: rgba(50, 50, 50, 0.8);
+.app-container.dark .post-wrapper {
+  background: rgba(51, 51, 51, 0.8);
   color: #eee;
 }
-.app-container.dark .comments-section {
+.app-container.dark .action-bar {
+  background: #333;
+}
+.app-container.dark .profile-name {
+  color: #eee;
+}
+.app-container.dark .comment-area {
   background-color: #333;
   color: #eee;
 }
-.app-container.dark .toolbar button {
-  /* Ensure toolbar buttons appear in white text in dark mode */
-  color: #fff;
-}
-.app-container.dark.notification-container{
+
+.app-container.dark .notification-container {
   background: rgba(50, 50, 50, 0.8);
   color: #eee;
 }
+.app-container.dark .profile-container {
+  background: #333;
+}
+.app-container.dark .edit-profile-container {
+  background: linear-gradient(135deg, #2c2c2c, #444);
+}
+
 /* Main Content Area */
 .main-content {
   flex: 1;
-  margin-left: 240px; /* space for the vertical sidebar */
+  margin-left: 240px; /* Space for the vertical sidebar */
   padding: 20px;
   overflow-y: auto;
-  /* Restore background image */
   background-image: url("https://images.pexels.com/photos/1072179/pexels-photo-1072179.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1");
   background-repeat: no-repeat;
   background-size: cover;
-  border-radius:20px ;
+  border-radius: 20px;
 }
 
 /* Toolbar (inside Main Content) */
@@ -112,74 +130,6 @@ body, html {
   gap: 20px;
 }
 
-/* Post Container and Post Styling */
-.post-container {
-  position: relative;
-  display: flex;
-  align-items: flex-start;
-  animation: fadeIn 0.8s ease-in-out;
-}
-
-.post {
-  background: rgba(255, 255, 255, 0.7); /* Default: will be overridden by theme selectors above */
-  padding: 15px;
-  margin: 10px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-  height: 450px;
-  width: 450px;
-  transition: filter 0.3s ease;
-  overflow: hidden;
-}
-
-.post:hover {
-  filter: brightness(0.9);
-}
-
-.post.blurred {
-  filter: blur(5px);
-}
-
-.item1 {
-  flex: 0 0 90%;
-}
-
-.item2 {
-  align-items: end;
-  flex: 0 0 10%;
-  display: flex;
-  flex-direction: row;
-  gap: 40px;
-  padding-left: 30px;
-}
-
-.post img {
-  height: 90%;
-  width: 90%;
-  align-items: center;
-  padding-left: 2px;
-  margin-left: 20px;
-  padding-top: 5px;
-}
-
-/* Comment Box Styling */
-.comments-section {
-  position: absolute;
-  right: 30%;
-  left: 20%;
-  top: 10%;
-  bottom: 15%;
-  width: 300px;
-  background-color: #fff; /* Default: overridden by theme selectors */
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
-  padding: 15px;
-  overflow-y: auto;
-  max-height: 420px;
-}
-
 /* Add Container (e.g., for AddPost) */
 .add-container {
   background: rgba(255, 255, 255, 0.7);
@@ -195,24 +145,6 @@ body, html {
   animation: fadeIn 0.8s ease-in-out;
 }
 
-/* Image styling within a div */
-div img {
-  display: flex;
-  flex: 0 0 90%;
-  height: 80%;
-  width: 90%;
-  align-items: center;
-  padding-left: 20px;
-}
-
-/* Post Button Container */
-.post-button {
-  display: flex;
-  flex-direction: row;
-  padding-left: 90px;
-  gap: 50px;
-}
-
 /* Overlay for Modals (e.g., Edit Profile) */
 .overlay {
   position: fixed;
@@ -221,7 +153,7 @@ div img {
   width: 100%;
   height: 100%;
   backdrop-filter: blur(10px);
-  background-color: rgba(0, 0, 0, 0.2); /* Optional dark tint */
+  background-color: rgba(0, 0, 0, 0.2);
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -230,7 +162,6 @@ div img {
 
 /* Edit Profile Container */
 .edit-profile-container {
-  background: linear-gradient(135deg, #ffffff, #f0f0f0);
   padding: 30px;
   border-radius: 12px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
@@ -310,13 +241,11 @@ div img {
   transform: scale(1.05);
 }
 
-
 /* Profile Container */
 .profile-container {
   max-width: 900px;
   margin: 40px auto;
   padding: 30px;
-  background: #fff;
   border-radius: 15px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   animation: fadeIn 0.8s ease-in-out;
@@ -426,13 +355,18 @@ div img {
   background-color: #3178b8;
 }
 
-.toolbar button {
-  color: white !important; /* Ensures text color is always white */
-}
-
-.avatar img{
-  width:auto;
+/* Avatar */
+.avatar img {
+  width: auto;
   height: 50px;
 }
 
-
+/* Keyframe Animation for Fade-in Effect */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}

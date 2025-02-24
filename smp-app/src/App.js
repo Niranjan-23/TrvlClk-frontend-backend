@@ -1,3 +1,4 @@
+// App.jsx
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import Nav from './Nav';
@@ -67,7 +68,11 @@ const App = () => {
         try {
           const url = `http://localhost:5000/api/timeline?userId=${loggedInUser._id}`;
           console.log('Fetching timeline from:', url);
-          const response = await fetch(url);
+          const response = await fetch(url, {
+            headers: {
+              'Authorization': `Bearer ${getTokenFromLocalStorage()}` // Include token if your API requires it
+            }
+          });
           if (response.ok) {
             const data = await response.json();
             console.log('Timeline posts:', data.posts);
@@ -88,8 +93,11 @@ const App = () => {
       <div className="posts-container">
         {timelinePosts.length > 0 ? (
           timelinePosts.map((post, index) => (
-            // Pass the timeline post's imageUrl as the postId so that the original Post interface is maintained.
-            <Post key={index} postId={post.imageUrl} />
+            <Post 
+              key={index} 
+              post={post} // Pass the entire post object
+              loggedInUser={loggedInUser} // Pass logged-in user for profile
+            />
           ))
         ) : (
           <p>No posts to display</p>
