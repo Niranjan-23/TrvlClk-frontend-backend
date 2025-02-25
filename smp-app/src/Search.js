@@ -20,7 +20,26 @@ export default function Search() {
   const [searchQuery, setSearchQuery] = useState('');
   const [profiles, setProfiles] = useState([]);
   const [error, setError] = useState(null);
-  const currentUser = JSON.parse(localStorage.getItem('loggedInUser') || 'null');
+  // currentUser is stored as a state variable.
+  const [currentUser, setCurrentUser] = useState(
+    JSON.parse(localStorage.getItem('loggedInUser') || 'null')
+  );
+
+  // Helper to fetch the current user's data from the backend.
+  const fetchCurrentUser = async () => {
+    if (!currentUser || !currentUser._id) return;
+    try {
+      const response = await fetch(`http://localhost:5000/api/user/${currentUser._id}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch current user');
+      }
+      const data = await response.json();
+      setCurrentUser(data.user);
+      localStorage.setItem('loggedInUser', JSON.stringify(data.user));
+    } catch (error) {
+      console.error('Error fetching current user:', error);
+    }
+  };
 
   const fetchUsers = async (query) => {
     if (!currentUser || !currentUser._id) {
@@ -29,14 +48,16 @@ export default function Search() {
       return;
     }
     try {
-      const url = query && query.trim() !== ''
-        ? `http://localhost:5000/api/search?query=${encodeURIComponent(query)}&excludeId=${currentUser._id}`
-        : `http://localhost:5000/api/search?excludeId=${currentUser._id}`;
+      const url =
+        query && query.trim() !== ''
+          ? `http://localhost:5000/api/search?query=${encodeURIComponent(query)}&excludeId=${currentUser._id}`
+          : `http://localhost:5000/api/search?excludeId=${currentUser._id}`;
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error('Failed to fetch users');
       }
       const data = await response.json();
+      // data.users includes followRequests and followers from the backend.
       setProfiles(data.users || []);
       setError(null);
     } catch (error) {
@@ -46,19 +67,22 @@ export default function Search() {
     }
   };
 
-  // Debounced version of fetchUsers
+  // Create a debounced version of fetchUsers.
   const debouncedFetchUsers = useCallback(debounce(fetchUsers, 300), [currentUser?._id]);
 
+  // On mount, refresh both the current user and the profiles.
   useEffect(() => {
     if (currentUser && currentUser._id) {
-      fetchUsers(''); // Initial fetch only once
+      fetchCurrentUser();
+      fetchUsers('');
     }
-  }, [currentUser?._id]); // Depend on _id to avoid reference issues
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser?._id]);
 
   const handleSearchChange = (event) => {
     const query = event.target.value;
     setSearchQuery(query);
-    debouncedFetchUsers(query); // Debounced fetch
+    debouncedFetchUsers(query);
   };
 
   const handleFollow = async (targetId) => {
@@ -72,7 +96,10 @@ export default function Search() {
       const data = await response.json();
       if (response.ok) {
         alert('Follow request sent!');
-        fetchUsers(searchQuery); // Refresh profiles
+        // Refresh profiles so that the target user's followRequests are updated.
+        fetchUsers(searchQuery);
+        // Refresh current user info if needed.
+        fetchCurrentUser();
       } else {
         alert('Error: ' + data.error);
       }
@@ -92,7 +119,11 @@ export default function Search() {
       const data = await response.json();
       if (response.ok) {
         alert('Unfollowed successfully!');
-        fetchUsers(searchQuery); // Refresh profiles instead of reload
+        // Update currentUser using the returned data from the unfollow endpoint.
+        setCurrentUser(data.user);
+        localStorage.setItem('loggedInUser', JSON.stringify(data.user));
+        // Refresh profiles to update the UI.
+        fetchUsers(searchQuery);
       } else {
         alert('Error: ' + data.error);
       }
@@ -121,10 +152,20 @@ export default function Search() {
       {error && <div className="error">{error}</div>}
       <div className="profile-box">
         {profiles.map((profile) => {
+          // Determine if the current user already follows this profile by checking the backend data.
           const isFollowing =
-            currentUser &&
-            currentUser.following &&
-            currentUser.following.map(id => id.toString()).includes(profile._id.toString());
+            profile.followers &&
+            profile.followers
+              .map((id) => id.toString())
+              .includes(currentUser._id.toString());
+
+          // Check if a follow request is pending.
+          const isRequested =
+            profile.followRequests &&
+            profile.followRequests
+              .map((id) => id.toString())
+              .includes(currentUser._id.toString());
+
           return (
             <div key={profile._id} className="profile-item">
               <Avatar alt={profile.name} src={profile.profileImage} className="avatar" />
@@ -139,6 +180,10 @@ export default function Search() {
                       color="secondary"
                     >
                       Unfollow
+                    </Button>
+                  ) : isRequested ? (
+                    <Button disabled size="small" variant="contained">
+                      Requested
                     </Button>
                   ) : (
                     <Button

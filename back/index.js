@@ -144,7 +144,7 @@ app.post('/api/user/:id/posts', async (req, res) => {
 });
 
 // ----- Search Endpoint -----
-
+// Returns users (excluding the current user) along with followRequests and followers info.
 app.get('/api/search', async (req, res) => {
   try {
     const { query, excludeId } = req.query;
@@ -167,7 +167,7 @@ app.get('/api/search', async (req, res) => {
 
     const users = await User.find(filter)
       .limit(query ? 10 : 5)
-      .select('name username profileImage');
+      .select('name username profileImage followRequests followers');
     res.status(200).json({ users });
   } catch (error) {
     console.error('Error in GET /api/search:', error);
@@ -177,7 +177,6 @@ app.get('/api/search', async (req, res) => {
 
 // ----- Timeline Endpoint -----
 // Returns posts (image URLs) from users that the current user follows.
-// Each timeline post object has: username, profileImage, imageUrl
 app.get('/api/timeline', async (req, res) => {
   try {
     const { userId } = req.query;
@@ -213,7 +212,8 @@ app.get('/api/timeline', async (req, res) => {
 });
 
 // ----- Follow/Unfollow Endpoints -----
-// (Unchanged from your original code)
+
+// Follow Request: now also checks if already following.
 app.post('/api/user/:targetId/followRequest', async (req, res) => {
   try {
     const { requesterId } = req.body;
@@ -228,11 +228,22 @@ app.post('/api/user/:targetId/followRequest', async (req, res) => {
     }
     const targetUser = await User.findById(req.params.targetId);
     if (!targetUser) return res.status(404).json({ error: 'Target user not found' });
-    if (targetUser.followRequests.map(id => id.toString()).includes(requesterId.toString())) {
+    // Check if already following
+    if (
+      targetUser.followers.map(id => id.toString()).includes(requesterId.toString())
+    ) {
+      return res.status(400).json({ error: 'You are already following this user.' });
+    }
+    if (
+      targetUser.followRequests.map(id => id.toString()).includes(requesterId.toString())
+    ) {
       return res.status(400).json({ error: 'Follow request already sent' });
     }
     targetUser.followRequests.push(requesterId);
     await targetUser.save();
+
+    // Optional: Notify the target user here.
+
     res.status(200).json({ message: 'Follow request sent', user: targetUser });
   } catch (error) {
     handleDBError(res, error);
