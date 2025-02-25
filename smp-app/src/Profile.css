@@ -12,6 +12,30 @@ body {
   padding: 0;
 }
 
+/* Fade In Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Slide Up Animation for Post Items */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Profile Container */
 .profile-container {
   max-width: 900px;
@@ -21,6 +45,14 @@ body {
   border-radius: 15px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   animation: fadeIn 0.8s ease-in-out;
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth hover */
+  position: relative; /* Ensure stacking context */
+  z-index: 10; /* Base z-index below modal */
+}
+
+.profile-container:hover {
+  transform: translateY(-5px); /* Slight lift on hover */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Enhanced shadow */
 }
 
 /* Profile Header */
@@ -30,6 +62,11 @@ body {
   border-bottom: 2px solid #ddd;
   padding-bottom: 20px;
   margin-bottom: 20px;
+  transition: border-bottom-color 0.3s ease; /* Smooth border transition */
+}
+
+.profile-container:hover .profile-header {
+  border-bottom-color: #bbb; /* Slightly darker border on hover */
 }
 
 /* Profile Image */
@@ -41,39 +78,65 @@ body {
   overflow: hidden;
   margin-right: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth image hover */
+}
+
+.profile-container:hover .profile-image-wrapper {
+  transform: scale(1.05); /* Slight scale on hover */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Deeper shadow */
 }
 
 .profile-image {
   width: 100%;
   height: 100%;
-  object-fit:cover;
+  object-fit: cover;
   padding-left: 0px;
 }
 
 /* Profile Details */
 .profile-details {
   flex: 1;
+  transition: transform 0.3s ease; /* Smooth details animation */
 }
 
+.profile-container:hover .profile-details {
+  transform: translateX(5px); /* Slight shift right on hover */
+}
+
+/* Profile Name, Username, Bio, Stats */
 .profile-name {
   font-size: 28px;
   color: #333;
   margin-bottom: 5px;
+  transition: transform 0.2s ease; /* Smooth text animation */
+}
+
+.profile-container:hover .profile-name {
+  transform: scale(1.02); /* Slight scale on hover */
 }
 
 .profile-username {
   font-size: 16px;
   color: #777;
   margin-bottom: 10px;
+  transition: transform 0.2s ease;
+}
+
+.profile-container:hover .profile-username {
+  transform: scale(1.02);
 }
 
 .profile-bio {
   font-size: 18px;
   color: #555;
   margin-bottom: 15px;
+  transition: transform 0.2s ease;
 }
 
-/* Profile Stats */
+.profile-container:hover .profile-bio {
+  transform: scale(1.02);
+}
+
 .profile-stats {
   display: flex;
   gap: 30px;
@@ -82,6 +145,11 @@ body {
 .profile-stats div {
   font-size: 18px;
   color: #333;
+  transition: transform 0.2s ease; /* Smooth stats animation */
+}
+
+.profile-container:hover .profile-stats div {
+  transform: scale(1.05); /* Slight scale on hover */
 }
 
 /* Post Grid */
@@ -93,12 +161,20 @@ body {
 
 /* Post Item */
 .post-item {
+  position: relative; /* For delete button positioning */
   overflow: hidden;
   border-radius: 15px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  
+  animation: slideUp 0.5s ease-in-out; /* Slide up for each post */
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth hover */
 }
-.post-item img{
+
+.post-item:hover {
+  transform: scale(1.03); /* Slight scale on hover */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Enhanced shadow */
+}
+
+.post-item img {
   padding-left: 0px;
 }
 
@@ -109,13 +185,28 @@ body {
   object-fit: cover;
   display: block;
   border-radius: 15px;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease; /* Existing transition kept */
 }
 
 .post-item:hover .post-image {
-  transform: scale(1.05);
+  transform: scale(1.05); /* Existing scale kept */
 }
 
+/* Delete Button (IconButton) */
+.post-item .MuiIconButton-root {
+  transition: transform 0.2s ease, opacity 0.2s ease; /* Smooth delete button animation */
+}
+
+.post-item:hover .MuiIconButton-root {
+  transform: scale(1.2) rotate(10deg); /* Scale and tilt on hover */
+  opacity: 1; /* Ensure visibility */
+}
+
+.post-item .MuiIconButton-root:not(:hover) {
+  opacity: 0.7; /* Slightly faded when not hovered */
+}
+
+/* Edit Profile Button */
 .edit-profile-button {
   margin-top: 15px;
   padding: 8px 16px;
@@ -124,26 +215,16 @@ body {
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: transform 0.2s ease, box-shadow 0.2s ease; /* Smooth button animation */
 }
 
 .edit-profile-button:hover {
-  background-color: #3178b8;
+  transform: scale(1.05); /* Slight scale instead of color change */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Shadow instead of bg change */
 }
 
-.edit-profile-button {
-  margin-top: 15px;
-  padding: 8px 16px;
-  background-color: #3897f0;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.edit-profile-button:hover {
-  background-color: #3178b8;
+.edit-profile-button:active {
+  transform: scale(0.95); /* Slight press effect */
 }
 
 /* Dark Mode Profile Styles */
@@ -151,6 +232,10 @@ body {
   background: rgba(50, 50, 50, 0.8); /* Dark background */
   color: #eee; /* Light text */
   box-shadow: 0 2px 5px rgba(255, 255, 255, 0.1);
+}
+
+.app-container.dark .profile-container:hover {
+  box-shadow: 0 4px 10px rgba(255, 255, 255, 0.15); /* Dark mode shadow lift */
 }
 
 /* Ensure all profile text is white in dark mode */
@@ -168,5 +253,6 @@ body {
 }
 
 .app-container.dark .edit-profile-button:hover {
-  background-color: #777;
+  transform: scale(1.05); /* Consistent animation */
+  box-shadow: 0 2px 4px rgba(255, 255, 255, 0.2); /* Shadow instead of bg change */
 }

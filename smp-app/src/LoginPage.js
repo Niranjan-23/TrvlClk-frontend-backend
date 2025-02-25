@@ -1,3 +1,4 @@
+// LoginPage.js
 import React, { useState } from 'react';
 import { TextField, Button, Container, Typography, Box } from '@mui/material';
 import { Link } from 'react-router-dom';
@@ -41,12 +42,12 @@ const LoginPage = ({ onLogin }) => {
         <source src="https://videos.pexels.com/video-files/6981411/6981411-hd_1920_1080_25fps.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
-
+      
       {/* Login Form */}
       <Container maxWidth="xs" className="login-box">
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 3 }}>
           <h1 className="header-title">TrvlClk</h1>
-          <p className="words">Login to continue</p>
+          <p className="words">Welcome Back</p>
           <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3, width: '100%' }}>
             {error && (
               <Typography color="error" variant="body2" sx={{ mb: 2 }}>
@@ -55,30 +56,39 @@ const LoginPage = ({ onLogin }) => {
             )}
             <TextField
               label="Email"
-              variant="outlined"
+              variant="standard"
               fullWidth
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              className="login-field"
               sx={{ mb: 2 }}
             />
             <TextField
               label="Password"
               type="password"
-              variant="outlined"
+              variant="standard"
               fullWidth
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              className="login-field"
               sx={{ mb: 3 }}
             />
             <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mb: 2 }}>
               Login
             </Button>
-            <Typography variant="body2" align="center">
-              Don't have an account? <Link to="/SignUp">Sign Up</Link>
+            <Typography variant="body2" className="signup-text" align="center">
+              New here? <Link to="/SignUp" className="signup-link">Sign Up</Link>
             </Typography>
           </Box>
+          {/* Footer Message */}
+          <Typography
+            variant="caption"
+            sx={{ mt: 2, color: '#999', textAlign: 'center', fontSize: '0.75rem' }}
+          >
+            © 2025 TrvlClk | Explore the world.
+          </Typography>
         </Box>
       </Container>
     </div>

@@ -8,6 +8,11 @@
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   animation: slideUp 0.5s ease-out;
+  transition: box-shadow 0.3s ease; /* Smooth shadow transition */
+}
+
+.post-wrapper:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15); /* Slight lift effect on hover */
 }
 
 .post-container {
@@ -24,6 +29,11 @@
   object-fit: cover;
   display: block;
   padding-left: 0%;
+  transition: transform 0.3s ease; /* Smooth image scaling */
+}
+
+.post-content img:hover {
+  transform: scale(1.05); /* Subtle zoom on hover */
 }
 
 .action-bar {
@@ -31,6 +41,11 @@
   justify-content: space-between;
   align-items: center;
   padding: 0px 15px;
+  transition: background 0.2s ease; /* Smooth background change */
+}
+
+.action-bar:hover {
+  background: rgba(0, 0, 0, 0.02); /* Subtle hover effect */
 }
 
 .action-buttons {
@@ -42,10 +57,16 @@
   min-width: unset !important;
   padding: 6px !important;
   color: #666 !important;
+  transition: transform 0.2s ease, background 0.2s ease; /* Smooth button interactions */
 }
 
 .action-btn:hover {
   background: #f5f5f5 !important;
+  transform: scale(1.1); /* Slight scale-up on hover */
+}
+
+.action-btn:active {
+  transform: scale(0.95); /* Slight press effect */
 }
 
 .count {
@@ -53,6 +74,11 @@
   color: #e91e63;
   font-weight: 600;
   font-size: 14px;
+  transition: transform 0.2s ease; /* Smooth like count animation */
+}
+
+.action-btn:hover .count {
+  transform: scale(1.2); /* Slight bounce for like count on hover */
 }
 
 .profile-btn {
@@ -62,17 +88,32 @@
   text-transform: none !important;
   display: flex;
   align-items: center;
+  transition: transform 0.2s ease; /* Smooth profile button transition */
+}
+
+.profile-btn:hover {
+  transform: translateY(-2px); /* Slight lift on hover */
 }
 
 .profile-name {
   margin-left: 6px;
   font-size: 12px; /* Smaller size */
   font-weight: 500;
+  transition: color 0.3s ease; /* Smooth color transition */
+}
+
+.profile-btn:hover .profile-name {
+  color: #333; /* Slightly darker on hover for emphasis */
 }
 
 .avatar {
   width: 30px; /* Matches sx prop in JSX */
   height: 30px;
+  transition: transform 0.3s ease; /* Smooth avatar animation */
+}
+
+.profile-btn:hover .avatar {
+  transform: rotate(10deg); /* Playful tilt on hover */
 }
 
 .comment-area {
@@ -81,6 +122,7 @@
   overflow-y: auto;
   height: 465px; /* Matches post height (400px image + 48px action bar) */
   border-left: 1px solid #eee; /* Visual separation */
+  animation: fadeIn 0.3s ease-in; /* Smooth comment area appearance */
 }
 
 @keyframes slideUp {
@@ -94,3 +136,11 @@
   }
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

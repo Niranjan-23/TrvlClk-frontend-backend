@@ -1,3 +1,4 @@
+// SignUp.js
 import React, { useState } from 'react';
 import { TextField, Button, Container, Typography, Box } from '@mui/material';
 import { Link } from 'react-router-dom';
@@ -47,6 +48,9 @@ const SignUp = ({ onSignUp }) => {
         <source src="https://videos.pexels.com/video-files/6981411/6981411-hd_1920_1080_25fps.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
+
+
+      {/* SignUp Form */}
       <Container maxWidth="xs" className="login-box">
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 3 }}>
           <h1 className="header-title">TrvlClk</h1>
@@ -59,47 +63,51 @@ const SignUp = ({ onSignUp }) => {
             )}
             <TextField
               label="Email"
-              variant="outlined"
+              variant="standard"
               fullWidth
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              className="login-field"
               sx={{ mb: 2 }}
             />
             <TextField
               label="Username"
-              variant="outlined"
+              variant="standard"
               fullWidth
               required
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              className="login-field"
               sx={{ mb: 2 }}
             />
             <TextField
               label="Password"
               type="password"
-              variant="outlined"
+              variant="standard"
               fullWidth
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              className="login-field"
               sx={{ mb: 2 }}
             />
             <TextField
               label="Confirm Password"
               type="password"
-              variant="outlined"
+              variant="standard"
               fullWidth
               required
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
+              className="login-field"
               sx={{ mb: 3 }}
             />
             <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mb: 2 }}>
               Sign Up
             </Button>
-            <Typography variant="body2" align="center">
-              Already have an account? <Link to="/Login">Login</Link>
+            <Typography variant="body2" className="signup-text" align="center">
+              Already have an account? <Link to="/" className="signup-link">Login</Link>
             </Typography>
           </Box>
         </Box>

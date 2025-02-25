@@ -1,24 +1,16 @@
-/* Vertical Sidebar Navigation */
-.nav-container {
-  width: 240px;
-  height: 100vh;
-  padding: 20px;
-  background-color: var(--nav-bg-light);
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
-  position: fixed;
-  left: 0;
-  top: 0;
-  transition: background-color var(--transition);
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  z-index: 200;
+/* Fade In Animation for Sidebar */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
-/* Dark Theme for Sidebar */
-.app-container.dark .nav-container {
-  background-color: var(--nav-bg-dark);
-}/* Vertical Sidebar Navigation */
+/* Vertical Sidebar Navigation */
 .nav-container {
   width: 240px;
   height: 100vh;
@@ -28,11 +20,17 @@
   position: fixed;
   left: 0;
   top: 0;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.3s ease; /* Smooth background and shift */
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   z-index: 200;
+  animation: fadeIn 0.5s ease-out; /* Sidebar fade-in on load */
+}
+
+.nav-container:hover {
+  transform: translateX(5px); /* Subtle shift on hover */
+  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.15); /* Enhanced shadow */
 }
 
 /* Dark Theme for Sidebar */
@@ -40,60 +38,37 @@
   background-color: #1e1e1e;
 }
 
-/* Sidebar Title */
-.nav-title {
-  font-family: 'Lucida Handwriting', cursive;
-  font-size: 32px;
-  margin-bottom: 30px;
-  color: #6200ea;
+.app-container.dark .nav-container:hover {
+  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.3); /* Dark mode shadow */
 }
-
-/* Navigation Links Container */
-.nav-links {
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
-  width: 100%;
-}
-
-/* Nav Button Styling: Flat (icon and text only, no background fill) */
-.nav-button {
-  background: none;
-  border: none;
-  text-transform: none;
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: inherit;
-  width: 100%;
-  padding: 8px 0;
-  cursor: pointer;
-  transition: color 0.3s ease, transform 0.3s ease;
-}
-
-.nav-button:hover {
-  color: #6200ea;
-  transform: translateX(5px);
-}
-
 
 /* Sidebar Title */
 .nav-title {
   font-family: 'Lucida Handwriting', cursive;
   font-size: 32px;
   font-weight: bold;
-  margin: 30px;
-  color: var(--primary-color);
+  color: #383535;
+  padding-left: 15px;
+  margin: 30px 0 40px 20px; /* Adjusted margin for balance */
+  transition: transform 0.3s ease, color 0.3s ease; /* Smooth title animation */
+}
+
+.app-container.dark .nav-title{
+  color: #f7f7f7;
+}
+
+.nav-container:hover .nav-title {
+  transform: scale(1.05); /* Slight scale on hover */
 }
 
 /* Navigation Links Container */
 .nav-links {
   display: flex;
   flex-direction: column;
-  margin-top: 30px;
-  gap: 70px;  /* Increased gap between buttons */
+  gap: 70px; /* Reduced gap for tighter layout */
   width: 100%;
+  margin-top: 40px;
+  padding-left: 20px; /* Align links with title */
 }
 
 /* Flat Nav Button Styling (icon and text only) */
@@ -101,18 +76,37 @@
   background: none;
   border: none;
   text-transform: none;
-  font-size: 16px;
+  font-size: 18px; /* Slightly larger for readability */
+  font-weight: 500; /* Medium weight for emphasis */
   display: flex;
   align-items: center;
-  gap: 10px;  /* Space between icon and text */
+  gap: 12px; /* Increased space between icon and text */
   color: inherit;
   width: 100%;
-  padding: 8px 0;
+  padding: 10px 0; /* Slightly more padding */
   cursor: pointer;
-  transition: color var(--transition), transform var(--transition);
+  transition: color 0.3s ease, transform 0.3s ease, padding-left 0.3s ease; /* Smooth transitions */
 }
 
 .nav-button:hover {
-  color: var(--primary-color);
-  transform: translateX(5px);
+  color: #6a6a65; /* Primary color on hover */
+  transform: translateX(10px); /* Slightly larger shift */
+  padding-left: 5px; /* Subtle indent effect */
+}
+
+.app-container.dark .nav-button:hover{
+  color: #f7f7f7;
+}
+/* Icon Animation */
+.nav-button svg {
+  transition: transform 0.3s ease; /* Smooth icon animation */
+}
+
+.nav-button:hover svg {
+  transform: scale(1.2) rotate(5deg); /* Scale and slight tilt on hover */
+}
+
+/* Active Link Styling (optional visual feedback) */
+.nav-link:active .nav-button {
+  transform: scale(0.95); /* Slight press effect */
 }

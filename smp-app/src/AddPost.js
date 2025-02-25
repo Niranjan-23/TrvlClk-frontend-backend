@@ -45,11 +45,10 @@ export default function AddPost({ user, onPostAdded = () => {} }) {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ imageUrl: imageUrl.trim() }), // Ensure imageUrl is sent
+          body: JSON.stringify({ imageUrl: imageUrl.trim() }),
         }
       );
   
-      // Handle response
       if (!response.ok) {
         const errorData = await response.json();
         console.error("Error adding post:", errorData.error || "Unknown error");
@@ -59,10 +58,8 @@ export default function AddPost({ user, onPostAdded = () => {} }) {
       const data = await response.json();
       console.log("Post added successfully:", data.user);
   
-      // Pass the updated user back to the parent
       onPostAdded(data.user);
   
-      // Reset states after posting
       setPreviewUrl("");
       setImageUrl("");
     } catch (error) {
@@ -74,45 +71,74 @@ export default function AddPost({ user, onPostAdded = () => {} }) {
     <div className="add-container">
       {previewUrl ? (
         <>
-          <img src={previewUrl} alt="Selected" />
+          <img src={previewUrl} alt="Selected Preview" />
           <div className="post-button">
-            <div>
-              <Button
-                type="button"
-                size="medium"
-                variant="contained"
-                startIcon={<FileUploadOutlinedIcon />}
-                onClick={handleUploadClick}
-              >
-                Upload
-              </Button>
-            </div>
-            <div>
-              <Button
-                type="button"
-                size="medium"
-                variant="contained"
-                startIcon={<BackupTwoToneIcon />}
-                onClick={handlePost}
-              >
-                Post
-              </Button>
-            </div>
+            <Button
+              type="button"
+              size="medium"
+              variant="contained"
+              startIcon={<FileUploadOutlinedIcon />}
+              onClick={handleUploadClick}
+              sx={{
+                background: "linear-gradient(45deg, #4CAF50, #81C784)", // Vibrant green gradient
+                color: "#fff",
+                padding: "10px 20px",
+                borderRadius: "8px",
+                boxShadow: "0 3px 6px rgba(0,0,0,0.2)",
+                "&:hover": {
+                  background: "linear-gradient(45deg, #388E3C, #66BB6A)",
+                  boxShadow: "0 5px 10px rgba(0,0,0,0.3)",
+                },
+              }}
+            >
+              Change Image
+            </Button>
+            <Button
+              type="button"
+              size="medium"
+              variant="contained"
+              startIcon={<BackupTwoToneIcon />}
+              onClick={handlePost}
+              sx={{
+                background: "linear-gradient(45deg, #1976D2, #42A5F5)", // Blue gradient
+                color: "#fff",
+                padding: "10px 20px",
+                borderRadius: "8px",
+                boxShadow: "0 3px 6px rgba(0,0,0,0.2)",
+                "&:hover": {
+                  background: "linear-gradient(45deg, #1565C0, #1E88E5)",
+                  boxShadow: "0 5px 10px rgba(0,0,0,0.3)",
+                },
+              }}
+            >
+              Post
+            </Button>
           </div>
         </>
       ) : (
-        <>
+        <div style={{ gap:"30px" ,display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%" }}>
           <h3>No Image Uploaded</h3>
           <Button
             type="button"
-            size="small"
+            size="medium" // Slightly larger for prominence
             variant="contained"
             startIcon={<FileUploadOutlinedIcon />}
             onClick={handleUploadClick}
+            sx={{
+              background: "linear-gradient(45deg, #FF5722, #FF8A65)", // Warm orange gradient
+              color: "#fff",
+              padding: "12px 24px",
+              borderRadius: "10px",
+              boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+              "&:hover": {
+                background: "linear-gradient(45deg, #E64A19, #F4511E)",
+                boxShadow: "0 6px 12px rgba(0,0,0,0.3)",
+              },
+            }}
           >
-            Upload
+            Upload Image
           </Button>
-        </>
+        </div>
       )}
     </div>
   );

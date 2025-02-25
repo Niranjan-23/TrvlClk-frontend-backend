@@ -1,4 +1,3 @@
-// App.jsx
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import Nav from './Nav';
@@ -10,6 +9,7 @@ import Search from './Search';
 import Notification from './Notification';
 import SignUp from './SignUp';
 import Profile from './Profile';
+import EditProfileComponent from './EditProfileComponent';
 import Button from '@mui/material/Button';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
@@ -32,7 +32,8 @@ const getTokenFromLocalStorage = () => localStorage.getItem('token') || null;
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(!!getTokenFromLocalStorage());
   const [loggedInUser, setLoggedInUser] = useState(getLoggedInUserFromLocalStorage());
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true); // Dark theme default
+  const [showEdit, setShowEdit] = useState(false); // Control EditProfileComponent visibility
 
   const handleLogin = (token, user) => {
     setLoggedInUser(user);
@@ -57,6 +58,15 @@ const App = () => {
 
   const toggleTheme = () => {
     setIsDarkMode(prev => !prev);
+  };
+
+  const handleEditClick = () => setShowEdit(true);
+  const handleCloseEdit = () => setShowEdit(false);
+
+  const handleSaveProfile = (updatedUser) => {
+    setLoggedInUser(updatedUser);
+    localStorage.setItem("loggedInUser", JSON.stringify(updatedUser));
+    setShowEdit(false); // Close modal after save
   };
 
   // Home component: Fetch timeline posts (from followed users)
@@ -138,6 +148,7 @@ const App = () => {
           setLoggedInUser(updatedUser);
           localStorage.setItem('loggedInUser', JSON.stringify(updatedUser));
         }}
+        onEditClick={handleEditClick} // Pass edit trigger to Profile
       />
     </div>
   );
@@ -177,6 +188,13 @@ const App = () => {
               <Route path="/ProfileSetting" element={<ProfileComp />} />
               <Route path="*" element={<div>404 - Page Not Found</div>} />
             </Routes>
+            {showEdit && (
+              <EditProfileComponent
+                user={loggedInUser}
+                onClose={handleCloseEdit}
+                onSave={handleSaveProfile}
+              />
+            )}
           </div>
         </div>
       )}

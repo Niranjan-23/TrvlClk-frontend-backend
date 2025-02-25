@@ -1,37 +1,70 @@
-.add-container{
-  background: rgba(255, 255, 255, 0.7);
-  padding: 30px;
-  margin: 100px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  display:flex;
+/* Add Container */
+.add-container {
+  background: rgba(255, 255, 255, 0.9); /* Slightly less transparent for a cleaner look */
+  padding: 40px;
+  margin: 80px auto; /* Centered with reduced margin */
+  border-radius: 15px; /* Smoother corners */
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); /* Deeper shadow for depth */
+  display: flex;
   flex-direction: column;
   height: 450px;
   width: 450px;
-  gap:20px;
+  gap: 25px;
   animation: fadeIn 0.8s ease-in-out;
+  backdrop-filter: blur(5px); /* Subtle blur effect */
+  transition: transform 0.3s ease; /* Smooth hover effect */
 }
 
-
-div img{
-  display: flex;
-  flex:0 0 90%;
-  height:80%;
-  width:90%;
-  align-items: center;
-  padding-left: 15px;
+.add-container:hover {
+  transform: translateY(-5px); /* Slight lift on hover */
 }
 
-.post-button{
+/* Image Styling */
+.add-container img {
+  flex: 0 0 85%;
+  height: 75%;
+  width: 100%; /* Full width for better fit */
+  object-fit: cover; /* Ensures image scales nicely */
+  border-radius: 10px; /* Rounded corners */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Soft shadow */
+  transition: transform 0.3s ease; /* Smooth scaling */
+}
+
+.add-container img:hover {
+  transform: scale(1.02); /* Subtle zoom on hover */
+}
+
+/* Post Button Container */
+.post-button {
   display: flex;
   flex-direction: row;
-  padding-left: 70px;
-  gap:50px;
+  justify-content: center; /* Center buttons */
+  gap: 30px; /* Reduced gap for balance */
+}
+
+/* Typography for No Image State */
+.add-container h3 {
+  font-family: 'Roboto', sans-serif;
+  font-size: 24px;
+  font-weight: 500;
+  color: #555; /* Softer gray */
+  text-align: center;
+  margin: 0;
+  text-transform: uppercase; /* Adds a modern touch */
+  letter-spacing: 1px; /* Slight spacing for elegance */
 }
 
 /* Dark Mode Styling */
-.app-container.dark .add-container{
-  background: rgba(50, 50, 50, 0.8); /* Darker background */
+.app-container.dark .add-container {
+  background: rgba(50, 50, 50, 0.9); /* Slightly less transparent */
   color: #eee; /* Light text */
-  box-shadow: 0 2px 5px rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5); /* Darker shadow */
+}
+
+.app-container.dark .add-container h3 {
+  color: #ccc; /* Softer light gray for dark mode */
+}
+
+.app-container.dark .add-container img {
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1); /* Light shadow in dark mode */
 }
