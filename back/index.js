@@ -37,6 +37,8 @@ const userSchema = new mongoose.Schema(
     bio: { type: String, default: '', trim: true },
     followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    // New field to store accepted follow requests that are waiting for "Follow Back"
+    acceptedFollowRequests: { type: [mongoose.Schema.Types.ObjectId], ref: 'User', default: [] },
     followRequests: { type: [mongoose.Schema.Types.ObjectId], ref: 'User', default: [] },
   },
   { timestamps: true }
@@ -144,7 +146,7 @@ app.post('/api/user/:id/posts', async (req, res) => {
 });
 
 // ----- Search Endpoint -----
-// Returns users (excluding the current user) along with followRequests and followers info.
+// Returns users (excluding the current user) along with followRequests, acceptedFollowRequests, and followers info.
 app.get('/api/search', async (req, res) => {
   try {
     const { query, excludeId } = req.query;
@@ -167,7 +169,7 @@ app.get('/api/search', async (req, res) => {
 
     const users = await User.find(filter)
       .limit(query ? 10 : 5)
-      .select('name username profileImage followRequests followers');
+      .select('name username profileImage followRequests acceptedFollowRequests followers');
     res.status(200).json({ users });
   } catch (error) {
     console.error('Error in GET /api/search:', error);
@@ -250,20 +252,25 @@ app.post('/api/user/:targetId/followRequest', async (req, res) => {
   }
 });
 
+// Get follow requests – returns both pending and accepted (waiting for follow back)
 app.get('/api/user/:id/followRequests', async (req, res) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ error: 'Invalid user ID' });
     }
     const user = await User.findById(req.params.id)
-      .populate('followRequests', 'name username profileImage');
+      .populate('followRequests acceptedFollowRequests', 'name username profileImage');
     if (!user) return res.status(404).json({ error: 'User not found' });
-    res.status(200).json({ followRequests: user.followRequests });
+    res.status(200).json({ 
+      pendingFollowRequests: user.followRequests,
+      acceptedFollowRequests: user.acceptedFollowRequests
+    });
   } catch (error) {
     handleDBError(res, error);
   }
 });
 
+// Accept follow request: moves requester from followRequests to acceptedFollowRequests and adds requester to followers.
 app.post('/api/user/:id/followRequest/accept', async (req, res) => {
   try {
     const { requesterId } = req.body;
@@ -276,14 +283,20 @@ app.post('/api/user/:id/followRequest/accept', async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ error: 'User not found' });
 
+    // Move the requester from pending to accepted.
     user.followRequests = user.followRequests.filter(
       id => id.toString() !== requesterId.toString()
     );
+    if (!user.acceptedFollowRequests.map(id => id.toString()).includes(requesterId.toString())) {
+      user.acceptedFollowRequests.push(requesterId);
+    }
+    // Also add requester to followers.
     if (!user.followers.map(id => id.toString()).includes(requesterId.toString())) {
       user.followers.push(requesterId);
     }
     await user.save();
 
+    // Update the requester: add current user to requester's following.
     const requester = await User.findById(requesterId);
     if (requester && !requester.following.map(id => id.toString()).includes(req.params.id.toString())) {
       requester.following.push(req.params.id);
@@ -302,6 +315,7 @@ app.post('/api/user/:id/followRequest/accept', async (req, res) => {
   }
 });
 
+// Reject follow request: simply removes the requester from pending followRequests.
 app.post('/api/user/:id/followRequest/reject', async (req, res) => {
   try {
     const { requesterId } = req.body;
@@ -328,6 +342,7 @@ app.post('/api/user/:id/followRequest/reject', async (req, res) => {
   }
 });
 
+// Follow Back: removes requester from acceptedFollowRequests and updates following/followers.
 app.post('/api/user/:id/followBack', async (req, res) => {
   try {
     const { requesterId } = req.body;
@@ -340,14 +355,17 @@ app.post('/api/user/:id/followBack', async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    user.followRequests = user.followRequests.filter(
+    // Remove from acceptedFollowRequests (completing the notification process)
+    user.acceptedFollowRequests = user.acceptedFollowRequests.filter(
       id => id.toString() !== requesterId.toString()
     );
+    // Add requester to following if not already.
     if (!user.following.map(id => id.toString()).includes(requesterId.toString())) {
       user.following.push(requesterId);
     }
     await user.save();
 
+    // Update requester: add current user to requester's followers.
     const requester = await User.findById(requesterId);
     if (requester && !requester.followers.map(id => id.toString()).includes(req.params.id.toString())) {
       requester.followers.push(req.params.id);
@@ -363,6 +381,7 @@ app.post('/api/user/:id/followBack', async (req, res) => {
   }
 });
 
+// Unfollow endpoint remains unchanged.
 app.post('/api/user/:targetId/unfollow', async (req, res) => {
   try {
     const { followerId } = req.body;
