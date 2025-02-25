@@ -1,4 +1,4 @@
-// Comment.jsx (unchanged from your provided code)
+// Comment.jsx
 import React, { useState, useEffect } from 'react';
 import { Avatar, Grid, Paper, Divider, TextField, Button } from '@mui/material';
 import './Comment.css';
@@ -50,37 +50,59 @@ export default function Comment() {
   return (
     <div style={{ padding: 14 }} className="comment-box">
       <h1>Comments</h1>
-      {comments.map((comment) => (
-        <Paper key={comment.id} style={{ padding: '40px 20px', animation: 'fadeIn 0.5s' }}>
-          <Grid container wrap="nowrap" spacing={2}>
+      <Paper
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: '350px', // Reduced height for the comment section
+          overflow: 'hidden',
+          padding: '20px',
+        }}
+      >
+        {/* Scrollable comment list */}
+        <div className='comment-scroll'>
+          {comments.map((comment) => (
+            <Paper
+              key={comment.id}
+              style={{
+                padding: '20px',
+                marginBottom: '10px',
+                animation: 'fadeIn 0.5s',
+              }}
+            >
+              <Grid container wrap="nowrap" spacing={2}>
+                <Grid item>
+                  <Avatar alt={comment.author} src={comment.avatar} />
+                </Grid>
+                <Grid justifyContent="left" item xs zeroMinWidth>
+                  <h4 style={{ margin: 0, textAlign: 'left' }}>{comment.author}</h4>
+                  <p style={{ textAlign: 'left' }}>{comment.text}</p>
+                  <p style={{ textAlign: 'left', color: 'gray' }}>{comment.time}</p>
+                </Grid>
+              </Grid>
+              <Divider variant="fullWidth" style={{ margin: '20px 0' }} />
+            </Paper>
+          ))}
+        </div>
+  
+        {/* Fixed input at the bottom of the container */}
+        <div style={{ paddingTop: '10px' }}>
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs>
+              <TextField
+                fullWidth
+                label="Add a comment"
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+              />
+            </Grid>
             <Grid item>
-              <Avatar alt={comment.author} src={comment.avatar} />
-            </Grid>
-            <Grid justifyContent="left" item xs zeroMinWidth>
-              <h4 style={{ margin: 0, textAlign: 'left' }}>{comment.author}</h4>
-              <p style={{ textAlign: 'left' }}>{comment.text}</p>
-              <p style={{ textAlign: 'left', color: 'gray' }}>{comment.time}</p>
+              <Button color="secondary" onClick={handleAddComment}>
+                <SendIcon />
+              </Button>
             </Grid>
           </Grid>
-          <Divider variant="fullWidth" style={{ margin: '30px 0' }} />
-        </Paper>
-      ))}
-      <Paper style={{ padding: '20px', marginTop: '20px' }}>
-        <Grid container spacing={2} alignItems="center">
-          <Grid item xs>
-            <TextField
-              fullWidth
-              label="Add a comment"
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-            />
-          </Grid>
-          <Grid item>
-            <Button color="secondary" onClick={handleAddComment}>
-              <SendIcon />
-            </Button>
-          </Grid>
-        </Grid>
+        </div>
       </Paper>
     </div>
   );

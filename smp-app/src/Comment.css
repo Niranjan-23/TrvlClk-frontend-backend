@@ -23,3 +23,12 @@
     transform: translateY(0);
   }
 }
+
+.comment-scroll{
+  flex: 1;
+  overflow-y: auto;     
+}
+
+.comment-scroll::-webkit-scrollbar {
+  display: none; 
+}
