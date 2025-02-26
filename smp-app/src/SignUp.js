@@ -13,14 +13,32 @@ const SignUp = ({ onSignUp }) => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    // Check that all fields are filled
     if (!email || !username || !password || !confirmPassword) {
       setError('All fields are required!');
       return;
     }
+
+    // Client-side email validation
+    const emailRegex = /\S+@\S+\.\S+/;
+    if (!emailRegex.test(email)) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+
+    // Client-side password validation: minimum eight characters, at least one letter and one number.
+    const passwordRegex = /(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}/;
+    if (!passwordRegex.test(password)) {
+      setError('Password must be minimum eight characters, at least one letter and one number.');
+      return;
+    }
+
     if (password !== confirmPassword) {
       setError('Passwords do not match!');
       return;
     }
+
     setError('');
 
     try {
@@ -48,7 +66,6 @@ const SignUp = ({ onSignUp }) => {
         <source src="https://videos.pexels.com/video-files/6981411/6981411-hd_1920_1080_25fps.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
-
 
       {/* SignUp Form */}
       <Container maxWidth="xs" className="login-box">

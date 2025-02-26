@@ -1,3 +1,4 @@
+// server.js
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -25,19 +26,34 @@ mongoose
     process.exit(1);
   });
 
-// User Schema & Model
+// User Schema & Model with validation constraints
 const userSchema = new mongoose.Schema(
   {
     name: { type: String, trim: true },
-    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-    username: { type: String, required: true, unique: true, trim: true },
-    password: { type: String, required: true },
+    email: { 
+      type: String, 
+      required: [true, 'Email is required'], 
+      unique: true, 
+      lowercase: true, 
+      trim: true, 
+      match: [/\S+@\S+\.\S+/, 'Please use a valid email address.']
+    },
+    username: { 
+      type: String, 
+      required: [true, 'Username is required'], 
+      unique: true, 
+      trim: true 
+    },
+    password: { 
+      type: String, 
+      required: [true, 'Password is required'],
+      match: [/(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}/, 'Password must be minimum eight characters, at least one letter and one number.']
+    },
     profileImage: { type: String, default: '/default-avatar.png' },
     posts: { type: [String], default: [] },
     bio: { type: String, default: '', trim: true },
     followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    // New field to store accepted follow requests that are waiting for "Follow Back"
     acceptedFollowRequests: { type: [mongoose.Schema.Types.ObjectId], ref: 'User', default: [] },
     followRequests: { type: [mongoose.Schema.Types.ObjectId], ref: 'User', default: [] },
   },
@@ -48,6 +64,9 @@ const User = mongoose.model('User', userSchema);
 // Helper: Handle errors
 const handleDBError = (res, error) => {
   console.error('Database Error:', error);
+  if (error.name === 'ValidationError') {
+    return res.status(400).json({ error: error.message });
+  }
   res.status(500).json({ error: 'Internal server error' });
 };
 
@@ -146,7 +165,7 @@ app.post('/api/user/:id/posts', async (req, res) => {
 });
 
 // ----- Search Endpoint -----
-// Returns users (excluding the current user) along with followRequests, acceptedFollowRequests, and followers info.
+
 app.get('/api/search', async (req, res) => {
   try {
     const { query, excludeId } = req.query;
@@ -178,7 +197,7 @@ app.get('/api/search', async (req, res) => {
 });
 
 // ----- Timeline Endpoint -----
-// Returns posts (image URLs) from users that the current user follows.
+
 app.get('/api/timeline', async (req, res) => {
   try {
     const { userId } = req.query;
@@ -215,7 +234,7 @@ app.get('/api/timeline', async (req, res) => {
 
 // ----- Follow/Unfollow Endpoints -----
 
-// Follow Request: now also checks if already following.
+// Follow Request
 app.post('/api/user/:targetId/followRequest', async (req, res) => {
   try {
     const { requesterId } = req.body;
@@ -231,20 +250,14 @@ app.post('/api/user/:targetId/followRequest', async (req, res) => {
     const targetUser = await User.findById(req.params.targetId);
     if (!targetUser) return res.status(404).json({ error: 'Target user not found' });
     // Check if already following
-    if (
-      targetUser.followers.map(id => id.toString()).includes(requesterId.toString())
-    ) {
+    if (targetUser.followers.map(id => id.toString()).includes(requesterId.toString())) {
       return res.status(400).json({ error: 'You are already following this user.' });
     }
-    if (
-      targetUser.followRequests.map(id => id.toString()).includes(requesterId.toString())
-    ) {
+    if (targetUser.followRequests.map(id => id.toString()).includes(requesterId.toString())) {
       return res.status(400).json({ error: 'Follow request already sent' });
     }
     targetUser.followRequests.push(requesterId);
     await targetUser.save();
-
-    // Optional: Notify the target user here.
 
     res.status(200).json({ message: 'Follow request sent', user: targetUser });
   } catch (error) {
@@ -252,7 +265,7 @@ app.post('/api/user/:targetId/followRequest', async (req, res) => {
   }
 });
 
-// Get follow requests – returns both pending and accepted (waiting for follow back)
+// Get follow requests
 app.get('/api/user/:id/followRequests', async (req, res) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
@@ -270,7 +283,7 @@ app.get('/api/user/:id/followRequests', async (req, res) => {
   }
 });
 
-// Accept follow request: moves requester from followRequests to acceptedFollowRequests and adds requester to followers.
+// Accept follow request
 app.post('/api/user/:id/followRequest/accept', async (req, res) => {
   try {
     const { requesterId } = req.body;
@@ -315,7 +328,7 @@ app.post('/api/user/:id/followRequest/accept', async (req, res) => {
   }
 });
 
-// Reject follow request: simply removes the requester from pending followRequests.
+// Reject follow request
 app.post('/api/user/:id/followRequest/reject', async (req, res) => {
   try {
     const { requesterId } = req.body;
@@ -342,7 +355,7 @@ app.post('/api/user/:id/followRequest/reject', async (req, res) => {
   }
 });
 
-// Follow Back: removes requester from acceptedFollowRequests and updates following/followers.
+// Follow Back
 app.post('/api/user/:id/followBack', async (req, res) => {
   try {
     const { requesterId } = req.body;
@@ -381,7 +394,7 @@ app.post('/api/user/:id/followBack', async (req, res) => {
   }
 });
 
-// Unfollow endpoint remains unchanged.
+// Unfollow
 app.post('/api/user/:targetId/unfollow', async (req, res) => {
   try {
     const { followerId } = req.body;
