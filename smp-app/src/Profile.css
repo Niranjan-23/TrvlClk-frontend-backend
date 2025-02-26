@@ -256,3 +256,151 @@ body {
   transform: scale(1.05); /* Consistent animation */
   box-shadow: 0 2px 4px rgba(255, 255, 255, 0.2); /* Shadow instead of bg change */
 }
+/* Modal Overlay */
+.modal-overlay {
+  position: absolute; /* Relative to profile-container */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3); /* Semi-transparent gray */
+  backdrop-filter: blur(5px); /* Subtle blur for background */
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  z-index: 20; /* Above profile-container content but within its context */
+}
+
+/* List Container */
+.list-container {
+  padding: 20px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.85); /* Slightly transparent white */
+  backdrop-filter: blur(12px); /* Blurred effect */
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 380px;
+  z-index: 21; /* Above overlay */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+}
+
+.list-container:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* List Header */
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 8px;
+}
+
+.list-header h2 {
+  font-size: 1.5em;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.list-container:hover .list-header h2 {
+  transform: scale(1.02);
+}
+
+.list-header .MuiIconButton-root {
+  color: #666;
+  padding: 5px;
+}
+
+.list-header .MuiIconButton-root:hover {
+  color: #333;
+  transform: scale(1.1);
+}
+
+/* List Content */
+.list-content {
+  max-height: 300px;
+  overflow-y: hidden; /* No scrollbar by default */
+}
+
+/* Enable scrollbar only when content overflows */
+.list-content.overflow {
+  overflow-y: auto;
+  scrollbar-width: none; /* Hide scrollbar */
+}
+
+.list-content.overflow::-webkit-scrollbar {
+  width: 0; /* Hide scrollbar in Webkit */
+}
+
+/* List Item */
+.list-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.list-item:hover {
+  transform: translateY(-2px);
+}
+
+.list-item img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 12px;
+  object-fit: cover;
+  border: 1px solid #eee;
+}
+
+.list-item span {
+  font-size: 1em;
+  font-weight: 500;
+  color: #222;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Dark Mode for Modal Overlay */
+.app-container.dark .modal-overlay {
+  background: rgba(0, 0, 0, 0.5); /* Darker overlay */
+}
+
+/* Dark Mode for List Container */
+.app-container.dark .list-container {
+  background: rgba(40, 40, 40, 0.85); /* Semi-transparent dark */
+  backdrop-filter: blur(12px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+}
+
+.app-container.dark .list-container:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7);
+}
+
+.app-container.dark .list-header h2 {
+  color: #eee; /* Matches your dark mode text */
+}
+
+.app-container.dark .list-header .MuiIconButton-root {
+  color: #aaa;
+}
+
+.app-container.dark .list-header .MuiIconButton-root:hover {
+  color: #fff;
+}
+
+.app-container.dark .list-item span {
+  color: #eee; /* Matches your dark mode text */
+}
+
+.app-container.dark .list-item img {
+  border: 1px solid #555;
+}
