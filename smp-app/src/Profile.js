@@ -69,6 +69,35 @@ const Profile = ({ user, onUserUpdate, onEditClick }) => {
     }
   }, [showFollowers, showFollowing, localUser]);
 
+  // Updated delete function to call the backend DELETE endpoint
+  const handleDeletePost = async (index) => {
+    const imageUrl = localUser.posts[index];
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/user/${localUser._id}/posts`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ imageUrl: imageUrl.trim() }),
+        }
+      );
+      if (!response.ok) {
+        console.error("Failed to delete post:", response.statusText);
+        return;
+      }
+      const data = await response.json();
+      // Update the state and localStorage with the updated user
+      setLocalUser(data.user);
+      localStorage.setItem("loggedInUser", JSON.stringify(data.user));
+      // Optionally trigger a parent update if needed
+      if (onUserUpdate) onUserUpdate(data.user);
+    } catch (error) {
+      console.error("Error deleting post:", error);
+    }
+  };
+
   if (!localUser)
     return <div className="profile-container">No user data available.</div>;
 
@@ -113,7 +142,7 @@ const Profile = ({ user, onUserUpdate, onEditClick }) => {
         ))}
       </div>
 
-      {/* Followers Modal - Inside profile-container */}
+      {/* Followers Modal */}
       {showFollowers && (
         <div className="modal-overlay" onClick={() => setShowFollowers(false)}>
           <div className="list-container" onClick={(e) => e.stopPropagation()}>
@@ -141,7 +170,7 @@ const Profile = ({ user, onUserUpdate, onEditClick }) => {
         </div>
       )}
 
-      {/* Following Modal - Inside profile-container */}
+      {/* Following Modal */}
       {showFollowing && (
         <div className="modal-overlay" onClick={() => setShowFollowing(false)}>
           <div className="list-container" onClick={(e) => e.stopPropagation()}>
@@ -170,11 +199,6 @@ const Profile = ({ user, onUserUpdate, onEditClick }) => {
       )}
     </div>
   );
-};
-
-// Placeholder for handleDeletePost
-const handleDeletePost = async () => {
-  console.log("Delete post logic here");
 };
 
 export default Profile;

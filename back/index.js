@@ -26,7 +26,7 @@ mongoose
     process.exit(1);
   });
 
-// User Schema & Model with validation constraints
+/* ==================== User Schema & Model ==================== */
 const userSchema = new mongoose.Schema(
   {
     name: { type: String, trim: true },
@@ -61,7 +61,7 @@ const userSchema = new mongoose.Schema(
 );
 const User = mongoose.model('User', userSchema);
 
-// Helper: Handle errors
+/* ==================== Helper: Handle errors ==================== */
 const handleDBError = (res, error) => {
   console.error('Database Error:', error);
   if (error.name === 'ValidationError') {
@@ -70,8 +70,7 @@ const handleDBError = (res, error) => {
   res.status(500).json({ error: 'Internal server error' });
 };
 
-// ----- Authentication & User Data Endpoints -----
-
+/* ==================== Authentication & User Data Endpoints ==================== */
 app.post('/api/signup', async (req, res) => {
   try {
     const { email, username, password, name } = req.body;
@@ -141,8 +140,8 @@ app.put('/api/user/:id', async (req, res) => {
   }
 });
 
-// ----- Content Endpoint -----
-
+/* ==================== Content Endpoints ==================== */
+// Add a new post
 app.post('/api/user/:id/posts', async (req, res) => {
   try {
     const { imageUrl } = req.body;
@@ -164,8 +163,34 @@ app.post('/api/user/:id/posts', async (req, res) => {
   }
 });
 
-// ----- Search Endpoint -----
+// ----- Delete Post Endpoint -----
+app.delete('/api/user/:id/posts', async (req, res) => {
+  try {
+    const { imageUrl } = req.body;
+    if (!imageUrl || typeof imageUrl !== 'string' || imageUrl.trim() === '') {
+      return res.status(400).json({ error: 'A valid image URL is required' });
+    }
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ error: 'Invalid user ID' });
+    }
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    
+    const initialLength = user.posts.length;
+    user.posts = user.posts.filter((post) => post !== imageUrl.trim());
+    
+    if (user.posts.length === initialLength) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+    
+    await user.save();
+    res.status(200).json({ message: 'Post deleted', user });
+  } catch (error) {
+    handleDBError(res, error);
+  }
+});
 
+/* ==================== Search Endpoint ==================== */
 app.get('/api/search', async (req, res) => {
   try {
     const { query, excludeId } = req.query;
@@ -196,8 +221,7 @@ app.get('/api/search', async (req, res) => {
   }
 });
 
-// ----- Timeline Endpoint -----
-
+/* ==================== Timeline Endpoint ==================== */
 app.get('/api/timeline', async (req, res) => {
   try {
     const { userId } = req.query;
@@ -232,8 +256,7 @@ app.get('/api/timeline', async (req, res) => {
   }
 });
 
-// ----- Follow/Unfollow Endpoints -----
-
+/* ==================== Follow/Unfollow Endpoints ==================== */
 // Follow Request
 app.post('/api/user/:targetId/followRequest', async (req, res) => {
   try {
@@ -430,7 +453,7 @@ app.post('/api/user/:targetId/unfollow', async (req, res) => {
   }
 });
 
-// ----- Serve Static Files -----
+/* ==================== Serve Static Files ==================== */
 app.use(express.static('public'));
 
 app.listen(PORT, () => {
