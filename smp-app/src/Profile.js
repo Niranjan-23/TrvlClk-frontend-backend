@@ -1,3 +1,4 @@
+// Profile.jsx
 import React, { useState, useEffect, useRef } from "react";
 import "./Profile.css";
 import IconButton from "@mui/material/IconButton";
@@ -5,17 +6,36 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
 
 const Profile = ({ user, onUserUpdate, onEditClick }) => {
-  const [localUser, setLocalUser] = useState(user);
+  // Initialize with an empty object if user is undefined
+  const [localUser, setLocalUser] = useState(user || {});
+  const [userPosts, setUserPosts] = useState([]);
   const [showFollowers, setShowFollowers] = useState(false);
   const [showFollowing, setShowFollowing] = useState(false);
   const [loading, setLoading] = useState(false);
   const followersRef = useRef(null);
   const followingRef = useRef(null);
 
+  // Update localUser when the user prop changes and fetch posts
   useEffect(() => {
-    setLocalUser(user);
+    setLocalUser(user || {});
+    const fetchUserPosts = async () => {
+      if (!user || !user._id) return;
+      try {
+        const response = await fetch(`http://localhost:5000/api/posts/user/${user._id}`);
+        if (response.ok) {
+          const data = await response.json();
+          setUserPosts(data.posts || []);
+        } else {
+          console.error("Failed to fetch user posts");
+        }
+      } catch (error) {
+        console.error("Error fetching user posts:", error);
+      }
+    };
+    fetchUserPosts();
   }, [user]);
 
+  // Fetch the latest user data from the backend
   const fetchCurrentUser = async () => {
     if (!user || !user._id) return;
     try {
@@ -23,7 +43,12 @@ const Profile = ({ user, onUserUpdate, onEditClick }) => {
       const response = await fetch(`http://localhost:5000/api/user/${user._id}`);
       if (!response.ok) throw new Error("Failed to fetch user");
       const data = await response.json();
-      setLocalUser(data.user);
+      // Ensure followers and following are arrays
+      setLocalUser({
+        ...data.user,
+        followers: data.user.followers || [],
+        following: data.user.following || [],
+      });
       localStorage.setItem("loggedInUser", JSON.stringify(data.user));
     } catch (error) {
       console.error("Error fetching current user:", error);
@@ -69,57 +94,58 @@ const Profile = ({ user, onUserUpdate, onEditClick }) => {
     }
   }, [showFollowers, showFollowing, localUser]);
 
-  // Updated delete function to call the backend DELETE endpoint
-  const handleDeletePost = async (index) => {
-    const imageUrl = localUser.posts[index];
+  // Delete post using new posts endpoint
+  const handleDeletePost = async (postId) => {
     try {
-      const response = await fetch(
-        `http://localhost:5000/api/user/${localUser._id}/posts`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ imageUrl: imageUrl.trim() }),
-        }
-      );
+      const response = await fetch(`http://localhost:5000/api/posts/${postId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId: localUser._id }),
+      });
       if (!response.ok) {
         console.error("Failed to delete post:", response.statusText);
         return;
       }
-      const data = await response.json();
-      // Update the state and localStorage with the updated user
-      setLocalUser(data.user);
-      localStorage.setItem("loggedInUser", JSON.stringify(data.user));
-      // Optionally trigger a parent update if needed
-      if (onUserUpdate) onUserUpdate(data.user);
+      await response.json();
+      // Remove the deleted post from local state
+      setUserPosts(userPosts.filter(post => post._id !== postId));
     } catch (error) {
       console.error("Error deleting post:", error);
     }
   };
 
-  if (!localUser)
+  // Create a safe user object ensuring followers and following are arrays
+  const safeUser = {
+    ...localUser,
+    followers: localUser.followers || [],
+    following: localUser.following || [],
+  };
+
+  // If no user data is available, render a fallback
+  if (!localUser || !localUser._id)
     return <div className="profile-container">No user data available.</div>;
 
   return (
     <div className="profile-container">
       <div className="profile-header">
         <div className="profile-image-wrapper">
-          <img src={localUser.profileImage} alt="Profile" className="profile-image" />
+          <img src={safeUser.profileImage} alt="Profile" className="profile-image" />
         </div>
         <div className="profile-details">
-          <h2 className="profile-name">{localUser.name}</h2>
-          <p className="profile-username">@{localUser.username}</p>
-          <p className="profile-bio">{localUser.bio}</p>
+          <h2 className="profile-name">{safeUser.name}</h2>
+          <p className="profile-username">@{safeUser.username}</p>
+          <p className="profile-bio">{safeUser.bio}</p>
           <div className="profile-stats">
             <div>
-              <strong>{localUser.posts.length}</strong> Posts
+              <strong>{userPosts.length}</strong> Posts
             </div>
             <div onClick={handleShowFollowers} style={{ cursor: "pointer" }}>
-              <strong>{localUser.followers.length}</strong> Followers
+              <strong>{safeUser.followers.length}</strong> Followers
             </div>
             <div onClick={handleShowFollowing} style={{ cursor: "pointer" }}>
-              <strong>{localUser.following.length}</strong> Following
+              <strong>{safeUser.following.length}</strong> Following
             </div>
           </div>
           <button onClick={onEditClick} className="edit-profile-button">
@@ -128,11 +154,11 @@ const Profile = ({ user, onUserUpdate, onEditClick }) => {
         </div>
       </div>
       <div className="post-grid">
-        {localUser.posts.map((post, index) => (
-          <div className="post-item" key={index} style={{ position: "relative" }}>
-            <img src={post} alt={`Post ${index + 1}`} className="post-image" />
+        {userPosts.map((post) => (
+          <div className="post-item" key={post._id} style={{ position: "relative" }}>
+            <img src={post.imageUrl} alt="Post" className="post-image" />
             <IconButton
-              onClick={() => handleDeletePost(index)}
+              onClick={() => handleDeletePost(post._id)}
               style={{ position: "absolute", top: 0, right: 0, background: "none", color: "white" }}
               size="small"
             >
@@ -155,8 +181,8 @@ const Profile = ({ user, onUserUpdate, onEditClick }) => {
             <div className="list-content" ref={followersRef}>
               {loading ? (
                 <p>Loading...</p>
-              ) : localUser.followers.length > 0 ? (
-                localUser.followers.map((follower) => (
+              ) : safeUser.followers.length > 0 ? (
+                safeUser.followers.map((follower) => (
                   <div key={follower._id} className="list-item">
                     <img src={follower.profileImage} alt={follower.username} />
                     <span>{follower.username}</span>
@@ -183,8 +209,8 @@ const Profile = ({ user, onUserUpdate, onEditClick }) => {
             <div className="list-content" ref={followingRef}>
               {loading ? (
                 <p>Loading...</p>
-              ) : localUser.following.length > 0 ? (
-                localUser.following.map((followed) => (
+              ) : safeUser.following.length > 0 ? (
+                safeUser.following.map((followed) => (
                   <div key={followed._id} className="list-item">
                     <img src={followed.profileImage} alt={followed.username} />
                     <span>{followed.username}</span>

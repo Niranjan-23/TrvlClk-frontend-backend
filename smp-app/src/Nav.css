@@ -103,7 +103,7 @@
 }
 
 .nav-button:hover svg {
-  transform: scale(1.2) rotate(5deg); /* Scale and slight tilt on hover */
+  transform: scale(1.4) rotate(5deg); /* Scale and slight tilt on hover */
 }
 
 /* Active Link Styling (optional visual feedback) */

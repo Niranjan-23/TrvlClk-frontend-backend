@@ -1,5 +1,5 @@
-// Post.jsx (adjusted for backend data structure)
-import React, { useState, useEffect } from 'react';
+// Post.jsx
+import React, { useState } from 'react';
 import './Post.css';
 import FavoriteTwoToneIcon from '@mui/icons-material/FavoriteTwoTone';
 import ChatBubbleTwoToneIcon from '@mui/icons-material/ChatBubbleTwoTone';
@@ -10,23 +10,25 @@ import { Avatar } from '@mui/material';
 
 const Post = ({ post, loggedInUser }) => {
   const [showComments, setShowComments] = useState(false);
-  const [likeCount, setLikeCount] = useState(0);
-  const [hasLiked, setHasLiked] = useState(false);
+  const [postLikes, setPostLikes] = useState(post.likes || []);
 
-  useEffect(() => {
-    const savedLikeCount = JSON.parse(localStorage.getItem(`likeCount_${post._id || post.imageUrl}`)) || 0;
-    const savedHasLiked = JSON.parse(localStorage.getItem(`hasLiked_${post._id || post.imageUrl}`)) || false;
-    setLikeCount(savedLikeCount);
-    setHasLiked(savedHasLiked);
-  }, [post]);
+  const hasLiked = postLikes.some(id => id.toString() === loggedInUser._id);
 
-  const handleLike = () => {
-    if (!hasLiked) {
-      const newLikeCount = likeCount + 1;
-      setLikeCount(newLikeCount);
-      setHasLiked(true);
-      localStorage.setItem(`likeCount_${post._id || post.imageUrl}`, JSON.stringify(newLikeCount));
-      localStorage.setItem(`hasLiked_${post._id || post.imageUrl}`, JSON.stringify(true));
+  const handleLike = async () => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/posts/${post._id}/like`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: loggedInUser._id })
+      });
+      if (!response.ok) {
+        console.error("Error liking post");
+        return;
+      }
+      const data = await response.json();
+      setPostLikes(data.post.likes);
+    } catch (error) {
+      console.error("Error liking post:", error);
     }
   };
 
@@ -46,7 +48,7 @@ const Post = ({ post, loggedInUser }) => {
             <div className="action-buttons">
               <Button onClick={handleLike} disabled={hasLiked} className="action-btn">
                 <FavoriteTwoToneIcon fontSize="medium" color={hasLiked ? "error" : "inherit"} />
-                <span className="count">{likeCount}</span>
+                <span className="count">{postLikes.length}</span>
               </Button>
               <Button onClick={handleCommentToggle} className="action-btn">
                 <ChatBubbleTwoToneIcon fontSize="medium" />
@@ -57,19 +59,19 @@ const Post = ({ post, loggedInUser }) => {
             </div>
             <Button className="profile-btn">
               <Avatar
-                alt={post.username || 'Unknown'}
-                src={post.profileImage || '/default-avatar.png'}
+                alt={post.user?.username || 'Unknown'}
+                src={post.user?.profileImage || '/default-avatar.png'}
                 className="avatar"
                 sx={{ width: 30, height: 30 }}
               />
-              <span className="profile-name">{post.username || 'Unknown'}</span>
+              <span className="profile-name">{post.user?.username || 'Unknown'}</span>
             </Button>
           </div>
         </div>
       </div>
       {showComments && (
         <div className="comment-area">
-          <Comment />
+          <Comment postId={post._id} loggedInUser={loggedInUser} />
         </div>
       )}
     </div>

@@ -33,21 +33,17 @@ export default function AddPost({ user, onPostAdded = () => {} }) {
   const handlePost = async () => {
     console.log("handlePost triggered", { imageUrl, user });
   
-    // Validate imageUrl and user ID
     if (!imageUrl?.trim() || !user?._id) {
       console.error("Image URL is empty or user ID is missing");
       return;
     }
   
     try {
-      const response = await fetch(
-        `http://localhost:5000/api/user/${user._id}/posts`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ imageUrl: imageUrl.trim() }),
-        }
-      );
+      const response = await fetch(`http://localhost:5000/api/posts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user._id, imageUrl: imageUrl.trim() }),
+      });
   
       if (!response.ok) {
         const errorData = await response.json();
@@ -56,9 +52,10 @@ export default function AddPost({ user, onPostAdded = () => {} }) {
       }
   
       const data = await response.json();
-      console.log("Post added successfully:", data.user);
+      console.log("Post added successfully:", data.post);
   
-      onPostAdded(data.user);
+      // Trigger callback to refresh timeline; do not update the loggedInUser state.
+      onPostAdded();
   
       setPreviewUrl("");
       setImageUrl("");
@@ -80,7 +77,7 @@ export default function AddPost({ user, onPostAdded = () => {} }) {
               startIcon={<FileUploadOutlinedIcon />}
               onClick={handleUploadClick}
               sx={{
-                background: "linear-gradient(45deg, #4CAF50, #81C784)", // Vibrant green gradient
+                background: "linear-gradient(45deg, #4CAF50, #81C784)",
                 color: "#fff",
                 padding: "10px 20px",
                 borderRadius: "8px",
@@ -100,7 +97,7 @@ export default function AddPost({ user, onPostAdded = () => {} }) {
               startIcon={<BackupTwoToneIcon />}
               onClick={handlePost}
               sx={{
-                background: "linear-gradient(45deg, #1976D2, #42A5F5)", // Blue gradient
+                background: "linear-gradient(45deg, #1976D2, #42A5F5)",
                 color: "#fff",
                 padding: "10px 20px",
                 borderRadius: "8px",
@@ -116,16 +113,16 @@ export default function AddPost({ user, onPostAdded = () => {} }) {
           </div>
         </>
       ) : (
-        <div style={{ gap:"30px" ,display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%" }}>
+        <div style={{ gap:"30px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%" }}>
           <h3>No Image Uploaded</h3>
           <Button
             type="button"
-            size="medium" // Slightly larger for prominence
+            size="medium"
             variant="contained"
             startIcon={<FileUploadOutlinedIcon />}
             onClick={handleUploadClick}
             sx={{
-              background: "linear-gradient(45deg, #FF5722, #FF8A65)", // Warm orange gradient
+              background: "linear-gradient(45deg, #FF5722, #FF8A65)",
               color: "#fff",
               padding: "12px 24px",
               borderRadius: "10px",

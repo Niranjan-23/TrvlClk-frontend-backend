@@ -80,7 +80,7 @@ const App = () => {
           console.log('Fetching timeline from:', url);
           const response = await fetch(url, {
             headers: {
-              'Authorization': `Bearer ${getTokenFromLocalStorage()}` // Include token if your API requires it
+              'Authorization': `Bearer ${getTokenFromLocalStorage()}`
             }
           });
           if (response.ok) {
@@ -105,8 +105,8 @@ const App = () => {
           timelinePosts.map((post, index) => (
             <Post 
               key={index} 
-              post={post} // Pass the entire post object
-              loggedInUser={loggedInUser} // Pass logged-in user for profile
+              post={post} 
+              loggedInUser={loggedInUser} 
             />
           ))
         ) : (
@@ -116,13 +116,14 @@ const App = () => {
     );
   };
 
+  // NewPost component: Adding a new post will refresh timeline without changing loggedInUser
   const NewPost = () => (
     <div className="posts-container">
       <AddPost 
         user={loggedInUser}
-        onPostAdded={updatedUser => {
-          setLoggedInUser(updatedUser);
-          localStorage.setItem('loggedInUser', JSON.stringify(updatedUser));
+        onPostAdded={() => {
+          // Optionally, trigger a timeline refresh here
+          console.log('New post added, refresh timeline if needed.');
         }}
       />
     </div>
@@ -148,7 +149,7 @@ const App = () => {
           setLoggedInUser(updatedUser);
           localStorage.setItem('loggedInUser', JSON.stringify(updatedUser));
         }}
-        onEditClick={handleEditClick} // Pass edit trigger to Profile
+        onEditClick={handleEditClick}
       />
     </div>
   );
