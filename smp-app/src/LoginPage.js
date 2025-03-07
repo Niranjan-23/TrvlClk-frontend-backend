@@ -40,7 +40,7 @@ const LoginPage = ({ onLogin }) => {
     <div className="login-container">
       {/* Background Video */}
       <video autoPlay muted loop className="background-video">
-        <source src="ss://videos.pexels.com/video-files/6981411/6981411-hd_1920_1080_25fps.mp4" type="video/mp4" />
+        <source src="https://videos.pexels.com/video-files/6981411/6981411-hd_1920_1080_25fps.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
       
