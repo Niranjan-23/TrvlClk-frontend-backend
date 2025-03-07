@@ -17,7 +17,7 @@ const Post = ({ post, loggedInUser }) => {
 
   const handleLike = async () => {
     try {
-      const response = await fetch(`https://${API_BASE_URL}/api/posts/${post._id}/like`, {
+      const response = await fetch(`${API_BASE_URL}/api/posts/${post._id}/like`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: loggedInUser._id })

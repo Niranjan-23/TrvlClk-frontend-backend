@@ -15,7 +15,7 @@ export default function Notification() {
   const fetchFollowRequests = async () => {
     if (!currentUser || !currentUser._id) return;
     try {
-      const response = await fetch(`https://${API_BASE_URL}/api/user/${currentUser._id}/followRequests`);
+      const response = await fetch(`${API_BASE_URL}/api/user/${currentUser._id}/followRequests`);
       if (!response.ok) {
         throw new Error('Failed to fetch follow requests');
       }
@@ -34,7 +34,7 @@ export default function Notification() {
   const fetchCurrentUser = async () => {
     if (!currentUser || !currentUser._id) return;
     try {
-      const response = await fetch(`https://${API_BASE_URL}/api/user/${currentUser._id}`);
+      const response = await fetch(`${API_BASE_URL}/api/user/${currentUser._id}`);
       if (!response.ok) throw new Error('Failed to fetch user');
       const data = await response.json();
       localStorage.setItem('loggedInUser', JSON.stringify(data.user));
@@ -62,7 +62,7 @@ export default function Notification() {
   // Handle Accept: calls the accept endpoint (which moves the request from pending to accepted).
   const handleAccept = async (requesterId) => {
     try {
-      const response = await fetch(`https://${API_BASE_URL}/api/user/${currentUser._id}/followRequest/accept`, {
+      const response = await fetch(`${API_BASE_URL}/api/user/${currentUser._id}/followRequest/accept`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ requesterId: requesterId.toString() }),
@@ -83,7 +83,7 @@ export default function Notification() {
 
   const handleReject = async (requesterId) => {
     try {
-      const response = await fetch(`https://${API_BASE_URL}/api/user/${currentUser._id}/followRequest/reject`, {
+      const response = await fetch(`${API_BASE_URL}/api/user/${currentUser._id}/followRequest/reject`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ requesterId: requesterId.toString() }),
@@ -103,7 +103,7 @@ export default function Notification() {
   // Handle Follow Back: calls the followBack endpoint, which removes the request from accepted.
   const handleFollowBack = async (requesterId) => {
     try {
-      const response = await fetch(`https://${API_BASE_URL}/api/user/${currentUser._id}/followBack`, {
+      const response = await fetch(`${API_BASE_URL}/api/user/${currentUser._id}/followBack`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ requesterId: requesterId.toString() }),

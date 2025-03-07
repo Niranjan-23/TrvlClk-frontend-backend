@@ -22,7 +22,7 @@ const Profile = ({ user, onUserUpdate, onEditClick }) => {
     const fetchUserPosts = async () => {
       if (!user || !user._id) return;
       try {
-        const response = await fetch(`http://${API_BASE_URL}/api/posts/user/${user._id}`);
+        const response = await fetch(`${API_BASE_URL}/api/posts/user/${user._id}`);
         if (response.ok) {
           const data = await response.json();
           setUserPosts(data.posts || []);
@@ -41,7 +41,7 @@ const Profile = ({ user, onUserUpdate, onEditClick }) => {
     if (!user || !user._id) return;
     try {
       setLoading(true);
-      const response = await fetch(`http://${API_BASE_URL}/api/user/${user._id}`);
+      const response = await fetch(`${API_BASE_URL}/api/user/${user._id}`);
       if (!response.ok) throw new Error("Failed to fetch user");
       const data = await response.json();
       // Ensure followers and following are arrays
@@ -98,7 +98,7 @@ const Profile = ({ user, onUserUpdate, onEditClick }) => {
   // Delete post using new posts endpoint
   const handleDeletePost = async (postId) => {
     try {
-      const response = await fetch(`https://${API_BASE_URL}/api/posts/${postId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/posts/${postId}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",

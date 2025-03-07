@@ -40,7 +40,7 @@ export default function AddPost({ user, onPostAdded = () => {} }) {
     }
   
     try {
-      const response = await fetch(`https://${API_BASE_URL}/api/posts`, {
+      const response = await fetch(`${API_BASE_URL}/api/posts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: user._id, imageUrl: imageUrl.trim() }),
