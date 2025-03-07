@@ -9,7 +9,7 @@ const EditProfileComponent = ({ user, onClose, onSave }) => {
 
   const handleSave = async () => {
     try {
-      const response = await fetch(`http://${API_BASE_URL}/api/user/${user._id}`, {
+      const response = await fetch(`https://${API_BASE_URL}/api/user/${user._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, bio, profileImage: profilePicture }),

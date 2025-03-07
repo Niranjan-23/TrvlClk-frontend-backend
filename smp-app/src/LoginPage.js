@@ -19,7 +19,7 @@ const LoginPage = ({ onLogin }) => {
     setError('');
 
     try {
-      const response = await fetch(`http://${API_BASE_URL}/api/login`, {
+      const response = await fetch(`https://${API_BASE_URL}/api/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
@@ -40,7 +40,7 @@ const LoginPage = ({ onLogin }) => {
     <div className="login-container">
       {/* Background Video */}
       <video autoPlay muted loop className="background-video">
-        <source src="https://videos.pexels.com/video-files/6981411/6981411-hd_1920_1080_25fps.mp4" type="video/mp4" />
+        <source src="ss://videos.pexels.com/video-files/6981411/6981411-hd_1920_1080_25fps.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
       

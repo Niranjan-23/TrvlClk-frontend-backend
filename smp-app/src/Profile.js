@@ -98,7 +98,7 @@ const Profile = ({ user, onUserUpdate, onEditClick }) => {
   // Delete post using new posts endpoint
   const handleDeletePost = async (postId) => {
     try {
-      const response = await fetch(`http://${API_BASE_URL}/api/posts/${postId}`, {
+      const response = await fetch(`https://${API_BASE_URL}/api/posts/${postId}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",

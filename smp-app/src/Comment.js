@@ -13,7 +13,7 @@ export default function Comment({ postId, loggedInUser }) {
   useEffect(() => {
     const fetchComments = async () => {
       try {
-        const response = await fetch(`http://${API_BASE_URL}/api/posts/${postId}/comments`);
+        const response = await fetch(`https://${API_BASE_URL}/api/posts/${postId}/comments`);
         if (response.ok) {
           const data = await response.json();
           setComments(data.comments || []);
@@ -34,7 +34,7 @@ export default function Comment({ postId, loggedInUser }) {
     if (newComment.trim() === '') return;
 
     try {
-      const response = await fetch(`http://${API_BASE_URL}/api/posts/${postId}/comments`, {
+      const response = await fetch(`https://${API_BASE_URL}/api/posts/${postId}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: loggedInUser._id, text: newComment })
