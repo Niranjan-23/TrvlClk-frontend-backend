@@ -15,9 +15,10 @@
   width: 240px;
   height: 100vh;
   padding: 20px;
+  padding-top: 10%;
   background-color: #f7f7f7;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
-  position: fixed;
+  position: absolute;
   left: 0;
   top: 0;
   transition: background-color 0.3s ease, transform 0.3s ease; /* Smooth background and shift */
@@ -26,6 +27,8 @@
   align-items: flex-start;
   z-index: 200;
   animation: fadeIn 0.5s ease-out; /* Sidebar fade-in on load */
+  overflow-y: auto;
+
 }
 
 .nav-container:hover {
@@ -109,4 +112,9 @@
 /* Active Link Styling (optional visual feedback) */
 .nav-link:active .nav-button {
   transform: scale(0.95); /* Slight press effect */
+}
+
+/* Hide scrollbar in Chrome, Safari, and Opera */
+.nav-container::-webkit-scrollbar {
+  display: none;
 }
