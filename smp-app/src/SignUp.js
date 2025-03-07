@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { TextField, Button, Container, Typography, Box } from '@mui/material';
 import { Link } from 'react-router-dom';
 import './Login.css';
+import API_BASE_URL from './config';
 
 const SignUp = ({ onSignUp }) => {
   const [email, setEmail] = useState('');
@@ -42,7 +43,7 @@ const SignUp = ({ onSignUp }) => {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:5000/api/signup', {
+      const response = await fetch(`http://${API_BASE_URL}/api/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, username, password })

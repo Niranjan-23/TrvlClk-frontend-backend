@@ -6,6 +6,7 @@ import TextField from '@mui/material/TextField';
 import IconButton from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
 import './Search.css';
+import API_BASE_URL from './config';
 
 // Simple debounce function
 const debounce = (func, delay) => {
@@ -28,7 +29,7 @@ export default function Search() {
   const fetchCurrentUser = async () => {
     if (!currentUser || !currentUser._id) return;
     try {
-      const response = await fetch(`http://localhost:5000/api/user/${currentUser._id}`);
+      const response = await fetch(`http://${API_BASE_URL}/api/user/${currentUser._id}`);
       if (!response.ok) {
         throw new Error('Failed to fetch current user');
       }
@@ -47,7 +48,7 @@ export default function Search() {
       return;
     }
     try {
-      let url = `http://localhost:5000/api/search?excludeId=${currentUser._id}`;
+      let url = `http://${API_BASE_URL}/api/search?excludeId=${currentUser._id}`;
       if (query && query.trim() !== '') {
         url += `&query=${encodeURIComponent(query)}`;
       }
@@ -86,7 +87,7 @@ export default function Search() {
   const handleFollow = async (targetId) => {
     if (!currentUser || !currentUser._id) return;
     try {
-      const response = await fetch(`http://localhost:5000/api/user/${targetId}/followRequest`, {
+      const response = await fetch(`http://${API_BASE_URL}/api/user/${targetId}/followRequest`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ requesterId: currentUser._id }),
@@ -108,7 +109,7 @@ export default function Search() {
   const handleUnfollow = async (targetId) => {
     if (!currentUser || !currentUser._id) return;
     try {
-      const response = await fetch(`http://localhost:5000/api/user/${targetId}/unfollow`, {
+      const response = await fetch(`http://${API_BASE_URL}/api/user/${targetId}/unfollow`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ followerId: currentUser._id }),

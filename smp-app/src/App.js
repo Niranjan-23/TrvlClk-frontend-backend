@@ -14,6 +14,7 @@ import Button from '@mui/material/Button';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import { Avatar } from '@mui/material';
+import API_BASE_URL from './config';
 
 // Helper functions to retrieve data from localStorage
 const getLoggedInUserFromLocalStorage = () => {
@@ -76,7 +77,7 @@ const App = () => {
     useEffect(() => {
       const fetchTimeline = async () => {
         try {
-          const url = `http://localhost:5000/api/timeline?userId=${loggedInUser._id}`;
+          const url = `http://${API_BASE_URL}/timeline?userId=${loggedInUser._id}`;
           console.log('Fetching timeline from:', url);
           const response = await fetch(url, {
             headers: {

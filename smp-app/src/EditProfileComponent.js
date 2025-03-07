@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./EditProfileComponent.css";
+import API_BASE_URL from "./config";
 
 const EditProfileComponent = ({ user, onClose, onSave }) => {
   const [name, setName] = useState(user.name || "");
@@ -8,7 +9,7 @@ const EditProfileComponent = ({ user, onClose, onSave }) => {
 
   const handleSave = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/user/${user._id}`, {
+      const response = await fetch(`http://${API_BASE_URL}/api/user/${user._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, bio, profileImage: profilePicture }),

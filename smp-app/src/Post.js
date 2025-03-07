@@ -7,6 +7,7 @@ import SendTwoToneIcon from '@mui/icons-material/SendTwoTone';
 import Button from '@mui/material/Button';
 import Comment from './Comment';
 import { Avatar } from '@mui/material';
+import API_BASE_URL from './config';
 
 const Post = ({ post, loggedInUser }) => {
   const [showComments, setShowComments] = useState(false);
@@ -16,7 +17,7 @@ const Post = ({ post, loggedInUser }) => {
 
   const handleLike = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/posts/${post._id}/like`, {
+      const response = await fetch(`http://${API_BASE_URL}/api/posts/${post._id}/like`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: loggedInUser._id })

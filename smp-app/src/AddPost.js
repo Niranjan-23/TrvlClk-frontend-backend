@@ -4,6 +4,7 @@ import Button from "@mui/material/Button";
 import BackupTwoToneIcon from "@mui/icons-material/BackupTwoTone";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import "./AddPost.css";
+import API_BASE_URL from "./config";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -39,7 +40,7 @@ export default function AddPost({ user, onPostAdded = () => {} }) {
     }
   
     try {
-      const response = await fetch(`http://localhost:5000/api/posts`, {
+      const response = await fetch(`http://${API_BASE_URL}/api/posts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: user._id, imageUrl: imageUrl.trim() }),
