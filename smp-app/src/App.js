@@ -77,7 +77,7 @@ const App = () => {
     useEffect(() => {
       const fetchTimeline = async () => {
         try {
-          const url = `${API_BASE_URL}/timeline?userId=${loggedInUser._id}`;
+          const url = `${API_BASE_URL}/api/timeline?userId=${loggedInUser._id}`;
           console.log('Fetching timeline from:', url);
           const response = await fetch(url, {
             headers: {
