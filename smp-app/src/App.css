@@ -90,9 +90,9 @@ body, html {
   margin-left: 240px; /* Space for the vertical sidebar */
   padding: 20px;
   overflow-y: auto;
-  background-image: url("https://images.pexels.com/photos/1072179/pexels-photo-1072179.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1");
+  background-image: url("https://images.pexels.com/photos/1072179/pexels-photo-1072179.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2");
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size:cover;
   border-radius: 20px;
   position: relative; /* Ensure stacking context for overlay */
   z-index: 5; /* Base z-index for main content */

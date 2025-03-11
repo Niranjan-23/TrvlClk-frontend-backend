@@ -77,8 +77,8 @@ const App = () => {
     useEffect(() => {
       const fetchTimeline = async () => {
         try {
+          console.log('Fetching timeline from:', API_BASE_URL);
           const url = `${API_BASE_URL}/api/timeline?userId=${loggedInUser._id}`;
-          console.log('Fetching timeline from:', url);
           const response = await fetch(url, {
             headers: {
               'Authorization': `Bearer ${getTokenFromLocalStorage()}`

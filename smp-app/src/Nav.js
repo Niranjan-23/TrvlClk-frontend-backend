@@ -7,11 +7,13 @@ import PersonSearchTwoToneIcon from '@mui/icons-material/PersonSearchTwoTone';
 import NotificationsActiveTwoToneIcon from '@mui/icons-material/NotificationsActiveTwoTone';
 import AccountCircleTwoToneIcon from '@mui/icons-material/AccountCircleTwoTone';
 import './Nav.css';
-
+import logo from './assets/logo.png';
 const Nav = () => {
   return (
     <div className="nav-container">
-      <div className="nav-title">TrvlClk</div>
+      <Link to="/">
+          <img src={logo} alt="TrvlClk Logo" className="logo-image" />
+        </Link>
       <div className="nav-links">
         <Link to="/" className="nav-link">
           <Button className="nav-button" color="success" variant="text">

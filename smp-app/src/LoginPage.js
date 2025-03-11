@@ -1,9 +1,9 @@
-// LoginPage.js
 import React, { useState } from 'react';
 import { TextField, Button, Container, Typography, Box } from '@mui/material';
 import { Link } from 'react-router-dom';
 import './Login.css';
 import API_BASE_URL from './config';
+import logo from './assets/logo.png'; // Adjust the path to your logo
 
 const LoginPage = ({ onLogin }) => {
   const [email, setEmail] = useState('');
@@ -48,7 +48,7 @@ const LoginPage = ({ onLogin }) => {
       {/* Login Form */}
       <Container maxWidth="xs" className="login-box">
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 3 }}>
-          <h1 className="header-title">TrvlClk</h1>
+          <img src={logo} alt="TrvlClk Logo" className="header-title logo-image1" />
           <p className="words">Welcome Back</p>
           <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3, width: '100%' }}>
             {error && (

@@ -6,17 +6,6 @@ import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import "./AddPost.css";
 import API_BASE_URL from "./config";
 
-const VisuallyHiddenInput = styled("input")({
-  clip: "rect(0 0 0 0)",
-  clipPath: "inset(50%)",
-  height: 1,
-  overflow: "hidden",
-  position: "absolute",
-  bottom: 0,
-  left: 0,
-  whiteSpace: "nowrap",
-  width: 1,
-});
 
 export default function AddPost({ user, onPostAdded = () => {} }) {
   const [previewUrl, setPreviewUrl] = useState("");

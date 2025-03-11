@@ -15,7 +15,7 @@
   width: 240px;
   height: 100vh;
   padding: 20px;
-  padding-top: 2%;
+  padding-top: 3%;
   background-color: #f7f7f7;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
   position: absolute;
@@ -28,7 +28,6 @@
   z-index: 200;
   animation: fadeIn 0.5s ease-out; /* Sidebar fade-in on load */
   overflow-y: auto;
-
 }
 
 .nav-container:hover {
@@ -45,23 +44,30 @@
   box-shadow: 4px 0 12px rgba(0, 0, 0, 0.3); /* Dark mode shadow */
 }
 
-/* Sidebar Title */
+/* Sidebar Title (for logo) */
 .nav-title {
-  font-family: 'Lucida Handwriting', cursive;
-  font-size: 32px;
-  font-weight: bold;
-  color: #383535;
-  padding-left: 15px;
-  margin: 30px 0 40px 20px; /* Adjusted margin for balance */
-  transition: transform 0.3s ease, color 0.3s ease; /* Smooth title animation */
-}
-
-.app-container.dark .nav-title{
-  color: #f7f7f7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 30px 0 40px 20px; /* Keep original margin */
+  transition: transform 0.3s ease; /* Smooth animation */
 }
 
 .nav-container:hover .nav-title {
   transform: scale(1.05); /* Slight scale on hover */
+}
+
+/* Logo Image */
+.logo-image {
+  height: 100px; /* Adjust based on your logo's size */
+  width: 110%; /* Maintain aspect ratio */
+  transition: transform 0.3s ease; /* Smooth transition for effects */
+  padding-left: 10px;
+}
+
+/* Optional: Add rotation on hover */
+.nav-container:hover .logo-image {
+  transform: rotate(5deg); /* Slight rotation on hover */
 }
 
 /* Navigation Links Container */
@@ -97,9 +103,10 @@
   padding-left: 5px; /* Subtle indent effect */
 }
 
-.app-container.dark .nav-button:hover{
+.app-container.dark .nav-button:hover {
   color: #f7f7f7;
 }
+
 /* Icon Animation */
 .nav-button svg {
   transition: transform 0.3s ease; /* Smooth icon animation */

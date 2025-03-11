@@ -91,11 +91,11 @@
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25); /* Enhanced shadow */
 }
 
-/* Header Title */
+/* Header Title (for logo) */
 .header-title {
-  font-family: 'Lucida Handwriting', cursive; /* Consistent with navbar */
-  font-size: 2.5rem;
-  color: #6200ea; /* Primary color for consistency */
+  display: flex;
+  justify-content: center;
+  align-items: center;
   text-align: center;
   margin-bottom: 10px;
   transition: transform 0.3s ease; /* Smooth title animation */
@@ -103,6 +103,18 @@
 
 .login-box:hover .header-title {
   transform: scale(1.05); /* Subtle scale on hover */
+}
+
+/* Logo Image */
+.logo-image1 {
+  height: 130px; /* Matches your desired size */
+  width: auto; /* Maintain aspect ratio */
+  transition: transform 0.3s ease; /* Smooth transition for effects */
+}
+
+/* Optional: Add rotation on hover */
+.login-box:hover .logo-image {
+  transform: rotate(5deg); /* Slight rotation on hover */
 }
 
 /* Subtitle Text */
@@ -216,4 +228,3 @@
   color: #4500a0; /* Darker purple */
   transform: translateX(2px); /* Subtle shift */
 }
-

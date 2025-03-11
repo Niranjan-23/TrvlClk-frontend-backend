@@ -30,20 +30,6 @@ export default function Notification() {
     }
   };
 
-  // Fetch current user data from the backend.
-  const fetchCurrentUser = async () => {
-    if (!currentUser || !currentUser._id) return;
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/user/${currentUser._id}`);
-      if (!response.ok) throw new Error('Failed to fetch user');
-      const data = await response.json();
-      localStorage.setItem('loggedInUser', JSON.stringify(data.user));
-      setCurrentUser(data.user);
-    } catch (error) {
-      console.error('Error fetching current user:', error);
-    }
-  };
-
   // Set up an event listener so that when "userUpdated" is dispatched, we update the user and refetch notifications.
   useEffect(() => {
     fetchFollowRequests();
