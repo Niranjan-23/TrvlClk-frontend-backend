@@ -273,7 +273,7 @@ body {
 
 /* List Container */
 .list-container {
-  padding: 20px;
+  padding: 30px;
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.85); /* Slightly transparent white */
   backdrop-filter: blur(12px); /* Blurred effect */
@@ -323,7 +323,7 @@ body {
 /* List Content */
 .list-content {
   max-height: 300px;
-  overflow-y: hidden; /* No scrollbar by default */
+  overflow-y: auto; /* No scrollbar by default */
 }
 
 /* Enable scrollbar only when content overflows */
@@ -403,4 +403,42 @@ body {
 
 .app-container.dark .list-item img {
   border: 1px solid #555;
+}
+
+.follow-button {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background-color: #1976d2; /* Primary blue, adjust to match your theme */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.follow-button:hover {
+  background-color: #115293;
+}
+
+.unfollow-button {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background-color: #ff4444; /* Secondary red, adjust to match your theme */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.unfollow-button:hover {
+  background-color: #cc0000;
+}
+
+.requested-button {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background-color: grey; /* Disabled color */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: not-allowed;
 }

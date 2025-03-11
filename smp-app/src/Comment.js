@@ -1,9 +1,32 @@
-// Comment.jsx
 import React, { useState, useEffect } from 'react';
 import { Avatar, Grid, Paper, Divider, TextField, Button } from '@mui/material';
 import './Comment.css';
 import SendIcon from '@mui/icons-material/Send';
 import API_BASE_URL from './config';
+
+// Utility function for relative time
+const getRelativeTime = (dateString) => {
+  const now = new Date();
+  const commentDate = new Date(dateString);
+  const diffInSeconds = Math.floor((now - commentDate) / 1000);
+
+  const intervals = [
+    { label: 'year', seconds: 31536000 },
+    { label: 'month', seconds: 2592000 },
+    { label: 'day', seconds: 86400 },
+    { label: 'hour', seconds: 3600 },
+    { label: 'minute', seconds: 60 },
+    { label: 'second', seconds: 1 }
+  ];
+
+  for (const interval of intervals) {
+    const count = Math.floor(diffInSeconds / interval.seconds);
+    if (count >= 1) {
+      return `${count} ${interval.label}${count > 1 ? 's' : ''} ago`;
+    }
+  }
+  return 'just now';
+};
 
 export default function Comment({ postId, loggedInUser }) {
   const [comments, setComments] = useState([]);
@@ -81,14 +104,16 @@ export default function Comment({ postId, loggedInUser }) {
                 <Grid justifyContent="left" item xs zeroMinWidth>
                   <h4 style={{ margin: 0, textAlign: 'left' }}>{comment.user.username}</h4>
                   <p style={{ textAlign: 'left' }}>{comment.text}</p>
-                  <p style={{ textAlign: 'left', color: 'gray' }}>{new Date(comment.createdAt).toLocaleString()}</p>
+                  <p style={{ textAlign: 'left', color: 'gray' }}>
+                    {getRelativeTime(comment.createdAt)}
+                  </p>
                 </Grid>
               </Grid>
               <Divider variant="fullWidth" style={{ margin: '20px 0' }} />
             </Paper>
           ))}
         </div>
-  
+
         {/* Fixed input at the bottom */}
         <div style={{ paddingTop: '10px' }}>
           <Grid container spacing={2} alignItems="center">

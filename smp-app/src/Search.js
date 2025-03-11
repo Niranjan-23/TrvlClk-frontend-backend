@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Avatar from '@mui/material/Avatar';
 import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1';
 import Button from '@mui/material/Button';
@@ -24,8 +25,9 @@ export default function Search() {
   const [currentUser, setCurrentUser] = useState(
     JSON.parse(localStorage.getItem('loggedInUser')) || null
   );
+  const navigate = useNavigate();
 
-  // Helper to fetch the current user's data from the backend.
+  // Fetch the current user's data from the backend
   const fetchCurrentUser = async () => {
     if (!currentUser || !currentUser._id) return;
     try {
@@ -41,6 +43,7 @@ export default function Search() {
     }
   };
 
+  // Fetch users based on search query
   const fetchUsers = async (query) => {
     if (!currentUser || !currentUser._id) {
       setProfiles([]);
@@ -67,10 +70,9 @@ export default function Search() {
     }
   };
 
-  // Create a debounced version of fetchUsers.
   const debouncedFetchUsers = useCallback(debounce(fetchUsers, 300), [currentUser?._id]);
 
-  // On mount, refresh both the current user and the profiles.
+  // On mount, refresh current user and profiles
   useEffect(() => {
     if (currentUser && currentUser._id) {
       fetchCurrentUser();
@@ -95,7 +97,6 @@ export default function Search() {
       const data = await response.json();
       if (response.ok) {
         alert('Follow request sent!');
-        // Refresh profiles and current user data.
         fetchUsers(searchQuery);
         fetchCurrentUser();
       } else {
@@ -128,6 +129,19 @@ export default function Search() {
     }
   };
 
+  // Navigate to the user's profile, aligned with App.js and Post.js
+  const handleProfileClick = (userId) => {
+    if (!userId) {
+      console.error("User ID is missing in profile data");
+      return;
+    }
+    if (userId === currentUser._id) {
+      navigate('/ProfileSetting'); // Navigate to own profile, matching App.js route
+    } else {
+      navigate(`/user/${userId}`); // Navigate to other user's profile
+    }
+  };
+
   return (
     <div className="search-container">
       <form onSubmit={(e) => e.preventDefault()}>
@@ -148,18 +162,25 @@ export default function Search() {
       {error && <div className="error">{error}</div>}
       <div className="profile-box">
         {profiles.map((profile) => {
-          // Determine if the current user already follows this profile.
           const isFollowing =
             profile.followers?.map((id) => id.toString()).includes(currentUser._id.toString());
           const isRequested =
             profile.followRequests?.map((id) => id.toString()).includes(currentUser._id.toString());
 
           return (
-            <div key={profile._id} className="profile-item">
+            <div
+              key={profile._id}
+              className="profile-item"
+              onClick={() => handleProfileClick(profile._id)}
+              style={{ cursor: 'pointer' }}
+            >
               <Avatar alt={profile.name} src={profile.profileImage} className="avatar" />
               <div className="profile-content">
                 <span>{profile.name}</span>
-                <div className="button-group">
+                <div
+                  className="button-group"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   {isFollowing ? (
                     <Button
                       onClick={() => handleUnfollow(profile._id)}

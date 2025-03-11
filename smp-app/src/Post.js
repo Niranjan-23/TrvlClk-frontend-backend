@@ -1,4 +1,3 @@
-// Post.jsx
 import React, { useState } from 'react';
 import './Post.css';
 import FavoriteTwoToneIcon from '@mui/icons-material/FavoriteTwoTone';
@@ -8,10 +7,12 @@ import Button from '@mui/material/Button';
 import Comment from './Comment';
 import { Avatar } from '@mui/material';
 import API_BASE_URL from './config';
+import { useNavigate } from 'react-router-dom';
 
 const Post = ({ post, loggedInUser }) => {
   const [showComments, setShowComments] = useState(false);
   const [postLikes, setPostLikes] = useState(post.likes || []);
+  const navigate = useNavigate();
 
   const hasLiked = postLikes.some(id => id.toString() === loggedInUser._id);
 
@@ -37,6 +38,14 @@ const Post = ({ post, loggedInUser }) => {
     setShowComments(prev => !prev);
   };
 
+  const handleProfileClick = () => {
+    if (post.user._id === loggedInUser._id) {
+      navigate(`/profile`); // Navigate to the user's own profile
+    } else {
+      navigate(`/user/${post.user._id}`); // Navigate to another user's profile
+    }
+  };
+
   return (
     <div className="post-wrapper">
       <div className="post-container">
@@ -58,7 +67,7 @@ const Post = ({ post, loggedInUser }) => {
                 <SendTwoToneIcon fontSize="medium" />
               </Button>
             </div>
-            <Button className="profile-btn">
+            <Button onClick={handleProfileClick} className="profile-btn">
               <Avatar
                 alt={post.user?.username || 'Unknown'}
                 src={post.user?.profileImage || '/default-avatar.png'}

@@ -1,19 +1,21 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import Button from '@mui/material/Button';
-import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
-import AddBoxOutlinedIcon from '@mui/icons-material/AddBoxOutlined';
-import PersonSearchTwoToneIcon from '@mui/icons-material/PersonSearchTwoTone';
-import NotificationsActiveTwoToneIcon from '@mui/icons-material/NotificationsActiveTwoTone';
-import AccountCircleTwoToneIcon from '@mui/icons-material/AccountCircleTwoTone';
-import './Nav.css';
-import logo from './assets/logo.png';
+import React from "react";
+import { Link } from "react-router-dom";
+import Button from "@mui/material/Button";
+import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
+import AddBoxOutlinedIcon from "@mui/icons-material/AddBoxOutlined";
+import PersonSearchTwoToneIcon from "@mui/icons-material/PersonSearchTwoTone";
+import NotificationsActiveTwoToneIcon from "@mui/icons-material/NotificationsActiveTwoTone";
+import AccountCircleTwoToneIcon from "@mui/icons-material/AccountCircleTwoTone";
+import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline"; // Import chat icon
+import "./Nav.css";
+import logo from "./assets/logo.png";
+
 const Nav = () => {
   return (
     <div className="nav-container">
       <Link to="/">
-          <img src={logo} alt="TrvlClk Logo" className="logo-image" />
-        </Link>
+        <img src={logo} alt="TrvlClk Logo" className="logo-image" />
+      </Link>
       <div className="nav-links">
         <Link to="/" className="nav-link">
           <Button className="nav-button" color="success" variant="text">
@@ -25,6 +27,13 @@ const Nav = () => {
           <Button color="success" className="nav-button" variant="text">
             <NotificationsActiveTwoToneIcon fontSize="large" />
             Notification
+          </Button>
+        </Link>
+        {/* Messages Button */}
+        <Link to="/messages" className="nav-link">
+          <Button color="success" className="nav-button" variant="text">
+            <ChatBubbleOutlineIcon fontSize="large" />
+            Messages
           </Button>
         </Link>
         <Link to="/Add-post" className="nav-link">
