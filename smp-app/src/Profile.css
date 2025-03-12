@@ -1,17 +1,3 @@
-/* Global Styles */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  font-family: 'Arial', sans-serif;
-  background: linear-gradient(135deg, #f3f3f3, #e9e9e9);
-  margin: 0;
-  padding: 0;
-}
-
 /* Fade In Animation */
 @keyframes fadeIn {
   from {
@@ -36,258 +22,64 @@ body {
   }
 }
 
+/* Modal Fade and Scale Animation */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 /* Profile Container */
 .profile-container {
-  max-width: 900px;
+  width: 70%;
   margin: 40px auto;
-  padding: 30px;
-  background: #fff;
-  border-radius: 15px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
   animation: fadeIn 0.8s ease-in-out;
-  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth hover */
-  position: relative; /* Ensure stacking context */
-  z-index: 10; /* Base z-index below modal */
+  position: relative;
+  min-height: 100vh; /* Ensure it has enough height */
 }
 
-.profile-container:hover {
-  transform: translateY(-5px); /* Slight lift on hover */
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Enhanced shadow */
-}
-
-/* Profile Header */
-.profile-header {
-  display: flex;
-  align-items: center;
-  border-bottom: 2px solid #ddd;
-  padding-bottom: 20px;
-  margin-bottom: 20px;
-  transition: border-bottom-color 0.3s ease; /* Smooth border transition */
-}
-
-.profile-container:hover .profile-header {
-  border-bottom-color: #bbb; /* Slightly darker border on hover */
-}
-
-/* Profile Image */
-.profile-image-wrapper {
-  flex-shrink: 0;
-  width: 150px;
-  height: 150px;
-  border-radius: 50%;
-  overflow: hidden;
-  margin-right: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth image hover */
-}
-
-.profile-container:hover .profile-image-wrapper {
-  transform: scale(1.05); /* Slight scale on hover */
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Deeper shadow */
-}
-
-.profile-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  padding-left: 0px;
-}
-
-/* Profile Details */
-.profile-details {
-  flex: 1;
-  transition: transform 0.3s ease; /* Smooth details animation */
-}
-
-.profile-container:hover .profile-details {
-  transform: translateX(5px); /* Slight shift right on hover */
-}
-
-/* Profile Name, Username, Bio, Stats */
-.profile-name {
-  font-size: 28px;
-  color: #333;
-  margin-bottom: 5px;
-  transition: transform 0.2s ease; /* Smooth text animation */
-}
-
-.profile-container:hover .profile-name {
-  transform: scale(1.02); /* Slight scale on hover */
-}
-
-.profile-username {
-  font-size: 16px;
-  color: #777;
-  margin-bottom: 10px;
-  transition: transform 0.2s ease;
-}
-
-.profile-container:hover .profile-username {
-  transform: scale(1.02);
-}
-
-.profile-bio {
-  font-size: 18px;
-  color: #555;
-  margin-bottom: 15px;
-  transition: transform 0.2s ease;
-}
-
-.profile-container:hover .profile-bio {
-  transform: scale(1.02);
-}
-
-.profile-stats {
-  display: flex;
-  gap: 30px;
-}
-
-.profile-stats div {
-  font-size: 18px;
-  color: #333;
-  transition: transform 0.2s ease; /* Smooth stats animation */
-}
-
-.profile-container:hover .profile-stats div {
-  transform: scale(1.05); /* Slight scale on hover */
-}
-
-/* Post Grid */
-.post-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 15px;
-}
-
-/* Post Item */
-.post-item {
-  position: relative; /* For delete button positioning */
-  overflow: hidden;
-  border-radius: 15px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  animation: slideUp 0.5s ease-in-out; /* Slide up for each post */
-  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth hover */
-}
-
-.post-item:hover {
-  transform: scale(1.03); /* Slight scale on hover */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Enhanced shadow */
-}
-
-.post-item img {
-  padding-left: 0px;
-}
-
-/* Post Image */
-.post-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  border-radius: 15px;
-  transition: transform 0.3s ease; /* Existing transition kept */
-}
-
-.post-item:hover .post-image {
-  transform: scale(1.05); /* Existing scale kept */
-}
-
-/* Delete Button (IconButton) */
-.post-item .MuiIconButton-root {
-  transition: transform 0.2s ease, opacity 0.2s ease; /* Smooth delete button animation */
-}
-
-.post-item:hover .MuiIconButton-root {
-  transform: scale(1.2) rotate(10deg); /* Scale and tilt on hover */
-  opacity: 1; /* Ensure visibility */
-}
-
-.post-item .MuiIconButton-root:not(:hover) {
-  opacity: 0.7; /* Slightly faded when not hovered */
-}
-
-/* Edit Profile Button */
-.edit-profile-button {
-  margin-top: 15px;
-  padding: 8px 16px;
-  background-color: #3897f0;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease; /* Smooth button animation */
-}
-
-.edit-profile-button:hover {
-  transform: scale(1.05); /* Slight scale instead of color change */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Shadow instead of bg change */
-}
-
-.edit-profile-button:active {
-  transform: scale(0.95); /* Slight press effect */
-}
-
-/* Dark Mode Profile Styles */
-.app-container.dark .profile-container {
-  background: rgba(50, 50, 50, 0.8); /* Dark background */
-  color: #eee; /* Light text */
-  box-shadow: 0 2px 5px rgba(255, 255, 255, 0.1);
-}
-
-.app-container.dark .profile-container:hover {
-  box-shadow: 0 4px 10px rgba(255, 255, 255, 0.15); /* Dark mode shadow lift */
-}
-
-/* Ensure all profile text is white in dark mode */
-.app-container.dark .profile-name,
-.app-container.dark .profile-username,
-.app-container.dark .profile-bio,
-.app-container.dark .profile-stats div {
-  color: #fff;
-}
-
-/* Change edit button in dark mode */
-.app-container.dark .edit-profile-button {
-  background-color: #555; /* Darker button */
-  color: #eee;
-}
-
-.app-container.dark .edit-profile-button:hover {
-  transform: scale(1.05); /* Consistent animation */
-  box-shadow: 0 2px 4px rgba(255, 255, 255, 0.2); /* Shadow instead of bg change */
-}
-/* Modal Overlay */
+/* Modal Overlay for Followers/Following */
 .modal-overlay {
-  position: absolute; /* Relative to profile-container */
+  position: fixed; /* Changed back to fixed for proper viewport coverage */
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.3); /* Semi-transparent gray */
-  backdrop-filter: blur(5px); /* Subtle blur for background */
-  display: flex;
-  justify-content: center; /* Center horizontally */
-  align-items: center; /* Center vertically */
-  z-index: 20; /* Above profile-container content but within its context */
-}
-
-/* List Container */
-.list-container {
-  padding: 30px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.85); /* Slightly transparent white */
-  backdrop-filter: blur(12px); /* Blurred effect */
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
   width: 100%;
-  max-width: 380px;
-  z-index: 21; /* Above overlay */
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  position: relative;
+  height: 100%;
+  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Increased z-index for proper layering */
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-.list-container:hover {
-  transform: scale(1.02);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+.modal-overlay.visible {
+  opacity: 1;
+}
+
+/* List Container for Followers/Following */
+.list-container {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  position: relative;
+  animation: modalFadeIn 0.3s ease-out;
+  z-index: 1001; /* Above overlay */
+  max-height: 80vh;
+  overflow-y: auto;
 }
 
 /* List Header */
@@ -296,149 +88,196 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 15px;
-  padding-bottom: 8px;
-}
-
-.list-header h2 {
-  font-size: 1.5em;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin: 0;
-}
-
-.list-container:hover .list-header h2 {
-  transform: scale(1.02);
-}
-
-.list-header .MuiIconButton-root {
-  color: #666;
-  padding: 5px;
-}
-
-.list-header .MuiIconButton-root:hover {
-  color: #333;
-  transform: scale(1.1);
 }
 
 /* List Content */
 .list-content {
-  max-height: 300px;
-  overflow-y: auto; /* No scrollbar by default */
-}
-
-/* Enable scrollbar only when content overflows */
-.list-content.overflow {
+  max-height: 200px;
   overflow-y: auto;
-  scrollbar-width: none; /* Hide scrollbar */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-.list-content.overflow::-webkit-scrollbar {
-  width: 0; /* Hide scrollbar in Webkit */
+.list-content::-webkit-scrollbar {
+  display: none;
 }
 
-/* List Item */
+/* List Item for Followers/Following */
 .list-item {
   display: flex;
   align-items: center;
-  padding: 10px 12px;
-  border-radius: 10px;
-  margin-bottom: 8px;
-  transition: background 0.2s ease, transform 0.2s ease;
+  padding: 10px;
+  opacity: 0;
+  animation: fadeIn 0.3s ease-out forwards;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
 .list-item:hover {
-  transform: translateY(-2px);
+  transform: scale(1.02);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: #f5f5f5;
 }
 
 .list-item img {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  margin-right: 12px;
+  margin-right: 10px;
   object-fit: cover;
-  border: 1px solid #eee;
 }
 
 .list-item span {
-  font-size: 1em;
-  font-weight: 500;
-  color: #222;
-  flex: 1;
-  white-space: nowrap;
+  font-size: 16px;
+  color: #333;
+}
+
+/* Profile Header */
+.profile-header {
+  display: flex;
+  align-items: center;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Profile Image */
+.profile-image-wrapper {
+  flex-shrink: 0;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
   overflow: hidden;
-  text-overflow: ellipsis;
+  margin-right: 20px;
 }
 
-/* Dark Mode for Modal Overlay */
-.app-container.dark .modal-overlay {
-  background: rgba(0, 0, 0, 0.5); /* Darker overlay */
+.profile-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-/* Dark Mode for List Container */
+/* Profile Details */
+.profile-details {
+  flex: 1;
+}
+
+.profile-name {
+  font-size: 32px;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.profile-username {
+  font-size: 18px;
+  color: #777;
+  margin-bottom: 10px;
+}
+
+.profile-bio {
+  font-size: 20px;
+  color: #555;
+  margin-bottom: 15px;
+}
+
+.profile-stats {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 20px;
+}
+
+.profile-stats div {
+  font-size: 18px;
+  color: #333;
+}
+
+/* Edit Profile Button (for Profile.jsx) */
+.edit-profile-button {
+  background-color: #3498db;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  border-bottom: 2px solid #2980b9;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.edit-profile-button:hover {
+  background-color: #2980b9;
+  transform: scale(1.05);
+}
+
+.edit-profile-button:active {
+  transform: scale(0.95);
+}
+
+/* Post Grid */
+.post-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+/* Post Item */
+.post-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  animation: slideUp 0.5s ease-in-out;
+  transition: transform 0.3s ease;
+  height: 300px;
+}
+
+.post-item:hover {
+  transform: scale(1.03);
+}
+
+.post-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 15px;
+  transition: transform 0.3s ease;
+}
+
+.post-item:hover .post-image {
+  transform: scale(1.05);
+}
+
+/* Dark Mode Styles */
+.app-container.dark .profile-container {
+  color: #eee;
+}
+
+.app-container.dark .profile-name,
+.app-container.dark .profile-username,
+.app-container.dark .profile-bio,
+.app-container.dark .profile-stats div {
+  color: #fff;
+}
+
 .app-container.dark .list-container {
-  background: rgba(40, 40, 40, 0.85); /* Semi-transparent dark */
-  backdrop-filter: blur(12px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
-}
-
-.app-container.dark .list-container:hover {
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7);
-}
-
-.app-container.dark .list-header h2 {
-  color: #eee; /* Matches your dark mode text */
-}
-
-.app-container.dark .list-header .MuiIconButton-root {
-  color: #aaa;
-}
-
-.app-container.dark .list-header .MuiIconButton-root:hover {
+  background: #333;
   color: #fff;
 }
 
 .app-container.dark .list-item span {
-  color: #eee; /* Matches your dark mode text */
+  color: #fff;
 }
 
-.app-container.dark .list-item img {
-  border: 1px solid #555;
+.app-container.dark .list-item:hover {
+  transform: scale(1.02);
+  box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
+  background-color: #444;
 }
 
-.follow-button {
-  margin-top: 10px;
-  padding: 8px 16px;
-  background-color: #1976d2; /* Primary blue, adjust to match your theme */
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+.app-container.dark .edit-profile-button {
+  background-color: #5dade2;
 }
 
-.follow-button:hover {
-  background-color: #115293;
-}
-
-.unfollow-button {
-  margin-top: 10px;
-  padding: 8px 16px;
-  background-color: #ff4444; /* Secondary red, adjust to match your theme */
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.unfollow-button:hover {
-  background-color: #cc0000;
-}
-
-.requested-button {
-  margin-top: 10px;
-  padding: 8px 16px;
-  background-color: grey; /* Disabled color */
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: not-allowed;
+.app-container.dark .edit-profile-button:hover {
+  background-color: #3498db;
 }

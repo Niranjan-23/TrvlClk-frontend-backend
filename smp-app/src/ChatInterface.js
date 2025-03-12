@@ -233,7 +233,7 @@ const ChatInterface = ({ loggedInUser }) => {
           <>
             <div className="chat-header">
               <Avatar src={activeChat.profileImage} className="header-avatar" />
-              <h2>Chat with {activeChat.name}</h2>
+              <h2>{activeChat.name}</h2>
             </div>
             <div className="chat-messages">
               {messages.map((msg) => (

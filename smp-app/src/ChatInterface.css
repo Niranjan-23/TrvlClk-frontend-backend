@@ -1,3 +1,15 @@
+/* Fade In Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Chat Interface Container */
 .chat-interface {
   display: flex;
@@ -58,8 +70,26 @@
 }
 
 .chat-search {
-  margin-bottom: 20px; /* Added gap between search and chat list */
+  margin-bottom: 20px;
   position: relative;
+}
+
+.chat-search input {
+  width: 100%;
+  padding: 10px 35px 10px 15px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  outline: none;
+  font-size: 0.95rem;
+  background: #fff;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+  color: #333;
+}
+
+.chat-search input:focus {
+  border-color: #0084ff;
+  box-shadow: 0 0 0 3px rgba(0, 132, 255, 0.2);
+  transform: scale(1.01);
 }
 
 .search-dropdown {
@@ -358,12 +388,12 @@
 }
 
 .dark .chat-sidebar h3 {
-  color: #e0e0e0; /* Lighter gray for visibility */
+  color: #e0e0e0;
 }
 
 .dark .sidebar-name,
 .dark .dropdown-name {
-  color: #e0e0e0; /* Lighter gray for visibility */
+  color: #e0e0e0;
 }
 
 .dark .chat-header {
@@ -371,7 +401,7 @@
 }
 
 .dark .chat-header h2 {
-  color: #e0e0e0; /* Lighter gray for visibility */
+  color: #e0e0e0;
 }
 
 .dark .chat-messages {
@@ -428,6 +458,17 @@
 .dark .search-dropdown {
   background: rgba(50, 50, 50, 0.95);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.dark .chat-search input {
+  background: #444;
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #e0e0e0;
+}
+
+.dark .chat-search input:focus {
+  border-color: #0066cc;
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.3);
 }
 
 .dark .chat-main-empty {

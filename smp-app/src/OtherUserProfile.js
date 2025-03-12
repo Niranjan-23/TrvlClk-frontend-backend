@@ -12,14 +12,11 @@ const OtherUserProfile = ({ user: propUser, loggedInUser, onUserUpdate }) => {
   const [localUser, setLocalUser] = useState(propUser || {});
   const [userPosts, setUserPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  
   const [showFollowersModal, setShowFollowersModal] = useState(false);
   const [showFollowingModal, setShowFollowingModal] = useState(false);
-
   const followersRef = useRef(null);
   const followingRef = useRef(null);
 
-  // Fetch user data from backend if not provided via props
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -46,7 +43,6 @@ const OtherUserProfile = ({ user: propUser, loggedInUser, onUserUpdate }) => {
     }
   }, [userId, propUser]);
 
-  // Fetch user's posts from backend
   useEffect(() => {
     const fetchUserPosts = async () => {
       if (!localUser._id) return;
@@ -65,12 +61,10 @@ const OtherUserProfile = ({ user: propUser, loggedInUser, onUserUpdate }) => {
     fetchUserPosts();
   }, [localUser]);
 
-  // Safely determine following status
   const isFollowing = localUser.followers?.some(
     (f) => f?._id?.toString() === loggedInUser?._id?.toString()
   );
 
-  // Safely determine if a follow request is pending
   const isRequested = localUser.followRequests?.some(
     (req) => {
       const match = req?._id?.toString() === loggedInUser?._id?.toString();
@@ -80,27 +74,20 @@ const OtherUserProfile = ({ user: propUser, loggedInUser, onUserUpdate }) => {
   );
   console.log("isRequested:", isRequested);
 
-  // Dynamically add/remove "overflow" class for modal content
   useEffect(() => {
-    if (showFollowersModal && followersRef.current) {
-      const content = followersRef.current;
-      if (content.scrollHeight > content.clientHeight) {
-        content.classList.add("overflow");
-      } else {
-        content.classList.remove("overflow");
-      }
-    }
-    if (showFollowingModal && followingRef.current) {
-      const content = followingRef.current;
-      if (content.scrollHeight > content.clientHeight) {
-        content.classList.add("overflow");
-      } else {
-        content.classList.remove("overflow");
-      }
-    }
-  }, [showFollowersModal, showFollowingModal, localUser]);
+    const handleModalTransition = () => {
+      const overlays = document.querySelectorAll('.modal-overlay');
+      overlays.forEach(overlay => {
+        if (showFollowersModal || showFollowingModal) {
+          overlay.classList.add('visible');
+        } else {
+          overlay.classList.remove('visible');
+        }
+      });
+    };
+    handleModalTransition();
+  }, [showFollowersModal, showFollowingModal]);
 
-  // Follow request handler
   const handleFollowRequest = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/user/${localUser._id}/followRequest`, {
@@ -111,7 +98,6 @@ const OtherUserProfile = ({ user: propUser, loggedInUser, onUserUpdate }) => {
       const data = await response.json();
       if (response.ok) {
         alert("Follow request sent!");
-        // Fetch updated user data to ensure followRequests is current
         const updatedResponse = await fetch(`${API_BASE_URL}/api/user/${localUser._id}`);
         if (updatedResponse.ok) {
           const updatedData = await updatedResponse.json();
@@ -126,7 +112,6 @@ const OtherUserProfile = ({ user: propUser, loggedInUser, onUserUpdate }) => {
     }
   };
 
-  // Unfollow handler
   const handleFollowUnfollow = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/user/${localUser._id}/unfollow`, {
@@ -171,7 +156,7 @@ const OtherUserProfile = ({ user: propUser, loggedInUser, onUserUpdate }) => {
               <strong>{localUser.following?.length || 0}</strong> Following
             </div>
           </div>
-          <div style={{ marginTop: '15px' }}>
+          <div>
             {isFollowing ? (
               <Button
                 onClick={handleFollowUnfollow}
@@ -205,7 +190,6 @@ const OtherUserProfile = ({ user: propUser, loggedInUser, onUserUpdate }) => {
         </div>
       </div>
       
-      {/* Render user's posts */}
       <div className="post-grid">
         {userPosts.map((post) => (
           <div className="post-item" key={post._id}>
@@ -220,14 +204,17 @@ const OtherUserProfile = ({ user: propUser, loggedInUser, onUserUpdate }) => {
           <div className="list-container" onClick={(e) => e.stopPropagation()}>
             <div className="list-header">
               <h2>Followers</h2>
-              <IconButton onClick={() => setShowFollowersModal(false)}>
+              <IconButton
+                onClick={() => setShowFollowersModal(false)}
+                style={{ position: "absolute", top: 10, right: 10 }}
+              >
                 <CloseIcon />
               </IconButton>
             </div>
             <div className="list-content" ref={followersRef}>
               {localUser.followers && localUser.followers.length > 0 ? (
-                localUser.followers.map((follower) => (
-                  <div key={follower._id} className="list-item">
+                localUser.followers.slice(0, 5).map((follower, index) => (
+                  <div key={follower._id} className="list-item" style={{ animationDelay: `${index * 0.1}s` }}>
                     <img src={follower.profileImage} alt={follower.username} />
                     <span>{follower.username}</span>
                   </div>
@@ -246,14 +233,17 @@ const OtherUserProfile = ({ user: propUser, loggedInUser, onUserUpdate }) => {
           <div className="list-container" onClick={(e) => e.stopPropagation()}>
             <div className="list-header">
               <h2>Following</h2>
-              <IconButton onClick={() => setShowFollowingModal(false)}>
+              <IconButton
+                onClick={() => setShowFollowingModal(false)}
+                style={{ position: "absolute", top: 10, right: 10 }}
+              >
                 <CloseIcon />
               </IconButton>
             </div>
             <div className="list-content" ref={followingRef}>
               {localUser.following && localUser.following.length > 0 ? (
-                localUser.following.map((followed) => (
-                  <div key={followed._id} className="list-item">
+                localUser.following.slice(0, 5).map((followed, index) => (
+                  <div key={followed._id} className="list-item" style={{ animationDelay: `${index * 0.1}s` }}>
                     <img src={followed.profileImage} alt={followed.username} />
                     <span>{followed.username}</span>
                   </div>

@@ -1,4 +1,28 @@
 /* Post.css */
+
+/* Slide Up Animation for Post */
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Fade In Animation for Comments */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Post Wrapper */
 .post-wrapper {
   display: flex;
   width: fit-content; /* Adjusts to content width */
@@ -15,10 +39,12 @@
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15); /* Slight lift effect on hover */
 }
 
+/* Post Container */
 .post-container {
   width: 400px; /* Fixed width for the post content */
 }
 
+/* Post Content */
 .post-content {
   width: 100%;
 }
@@ -36,6 +62,7 @@
   transform: scale(1.05); /* Subtle zoom on hover */
 }
 
+/* Action Bar */
 .action-bar {
   display: flex;
   justify-content: space-between;
@@ -48,6 +75,7 @@
   background: rgba(0, 0, 0, 0.02); /* Subtle hover effect */
 }
 
+/* Action Buttons */
 .action-buttons {
   display: flex;
   gap: 15px;
@@ -69,6 +97,7 @@
   transform: scale(0.95); /* Slight press effect */
 }
 
+/* Like Count */
 .count {
   margin-left: 5px;
   color: #e91e63;
@@ -81,6 +110,7 @@
   transform: scale(1.2); /* Slight bounce for like count on hover */
 }
 
+/* Profile Button */
 .profile-btn {
   min-width: unset !important;
   padding: 6px !important;
@@ -95,6 +125,7 @@
   transform: translateY(-2px); /* Slight lift on hover */
 }
 
+/* Profile Name */
 .profile-name {
   margin-left: 6px;
   font-size: 12px; /* Smaller size */
@@ -106,9 +137,12 @@
   color: #333; /* Slightly darker on hover for emphasis */
 }
 
+/* Avatar */
 .avatar {
-  width: 30px; /* Matches sx prop in JSX */
-  height: 30px;
+  width: 24px; /* Reduced from 30px to make it smaller */
+  height: 24px; /* Matches width for a perfect circle */
+  object-fit: cover; /* Ensures image fills the circle */
+  border-radius: 50%; /* Keeps it round */
   transition: transform 0.3s ease; /* Smooth avatar animation */
 }
 
@@ -116,6 +150,7 @@
   transform: rotate(10deg); /* Playful tilt on hover */
 }
 
+/* Comment Area */
 .comment-area {
   width: 400px; /* Fixed width for comments */
   padding: 25px;
@@ -125,22 +160,15 @@
   animation: fadeIn 0.3s ease-in; /* Smooth comment area appearance */
 }
 
-@keyframes slideUp {
-  from {
-    transform: translateY(20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+/* Theme Specific Background Colors */
+/* Light Theme: Pure White Background */
+.app-container.light .post-wrapper,
+.app-container.light .comment-area {
+  background-color: #fff;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+/* Dark Theme: Pure Black Background */
+.app-container.dark .post-wrapper,
+.app-container.dark .comment-area {
+  background-color: #181717;
 }

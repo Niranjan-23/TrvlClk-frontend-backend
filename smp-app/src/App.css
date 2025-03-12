@@ -1,3 +1,5 @@
+/* app.css */
+
 /* Global Styles */
 * {
   box-sizing: border-box;
@@ -10,95 +12,52 @@ body, html {
   padding: 0;
   width: 100%;
   height: 100%;
-  font-family: 'Roboto', sans-serif;
-  overflow: hidden; /* Prevent body scroll when overlay is active */
+  font-family: 'Inter', sans-serif;
+  overflow: hidden;
 }
 
 .main-content::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, and Opera */
+  display: none;
 }
 
 /* App Container */
 .app-container {
   display: flex;
-  flex-direction: column;
   height: 100vh;
 }
 
 /* Light Theme */
 .app-container.light {
-  background-color: #f6f9fc;
-  color: #333;
+  /* Overall light background remains a soft neutral */
+  background: linear-gradient(135deg, #f5f7fa 0%, #fff799 100%);
+  color: #2c3e50;
 }
 .app-container.light .main-content {
-  background-color: #f6f9fc;
-}
-.app-container.light .post-wrapper {
-  background: rgba(255, 255, 255, 0.8);
-  color: #333;
-}
-.app-container.light .action-bar {
-  background: #fff;
-}
-.app-container.light .profile-name {
-  color: #333;
-}
-.app-container.light .comment-area {
-  background-color: #fafafa;
-  color: #333;
-}
-.app-container .toolbar {
-  color: #ffffff;
-}
-.app-container.light .profile-container {
-  background: #fff;
+  /* Main container uses a yellow gradient */
+  background: linear-gradient(145deg, #fffde7 0%, #fff9c4 100%);
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
 }
 
 /* Dark Theme */
 .app-container.dark {
-  background-color: #2c2c2c;
-  color: #eee;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%);
+  color: #dcdcdc;
 }
 .app-container.dark .main-content {
-  background-color: #2c2c2c;
-}
-.app-container.dark .post-wrapper {
-  background: rgba(51, 51, 51, 0.8);
-  color: #eee;
-}
-.app-container.dark .action-bar {
-  background: #333;
-}
-.app-container.dark .profile-name {
-  color: #eee;
-}
-.app-container.dark .comment-area {
-  background-color: #333;
-  color: #eee;
-}
-.app-container.dark .notification-container {
-  background: rgba(50, 50, 50, 0.8);
-  color: #eee;
-}
-.app-container.dark .profile-container {
-  background: #333;
+  background: linear-gradient(145deg, #252525 0%, #353535 100%);
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
 }
 
 /* Main Content Area */
 .main-content {
   flex: 1;
-  margin-left: 240px; /* Space for the vertical sidebar */
+  margin-left: 240px;
   padding: 20px;
   overflow-y: auto;
-  background-image: url("https://images.pexels.com/photos/1072179/pexels-photo-1072179.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2");
-  background-repeat: no-repeat;
-  background-size:cover;
-  border-radius: 20px;
-  position: relative; /* Ensure stacking context for overlay */
-  z-index: 5; /* Base z-index for main content */
+  transition: background-color 0.3s ease;
 }
 
-/* Toolbar (inside Main Content) */
+/* Toolbar (Logout and Dark Mode Buttons) */
 .toolbar {
   display: flex;
   justify-content: flex-end;
@@ -108,171 +67,94 @@ body, html {
 
 .toolbar button {
   background: none;
-  border: none !important;
-  outline: none !important;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-weight: 600;
+  border: none;
+  color: inherit;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: color 0.3s ease, transform 0.2s ease;
 }
 
 .toolbar button:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  color: #3498db;
+  transform: scale(1.1);
+}
+
+.app-container.dark .toolbar button:hover {
+  color: #5dade2;
 }
 
 /* Posts Container */
 .posts-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
+  padding: 15px;
+  border-radius: 8px;
+  width: 100%;
 }
 
-/* Add Container (e.g., for AddPost) */
+/* Add Container */
 .add-container {
-  background: rgba(255, 255, 255, 0.7);
-  padding: 30px;
-  margin: 100px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-  height: 450px;
-  width: 450px;
-  gap: 20px;
-  animation: fadeIn 0.8s ease-in-out;
-}
-
-/* Profile Container */
-.profile-container {
-  max-width: 900px;
-  margin: 40px auto;
-  padding: 30px;
-  border-radius: 15px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  animation: fadeIn 0.8s ease-in-out;
-  position: relative; /* Ensure stacking context */
-  z-index: 10; /* Above main content but below overlay */
-}
-
-/* Profile Header */
-.profile-header {
-  display: flex;
-  align-items: center;
-  border-bottom: 2px solid #ddd;
-  padding-bottom: 20px;
-  margin-bottom: 20px;
-}
-
-/* Profile Image */
-.profile-image-wrapper {
-  flex-shrink: 0;
-  width: 150px;
-  height: 150px;
-  border-radius: 50%;
-  overflow: hidden;
-  margin-right: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-.profile-image {
+  padding: 20px;
+  border-radius: 8px;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  transition: all 0.3s ease;
 }
 
-/* Profile Details */
-.profile-details {
-  flex: 1;
-}
-
-.profile-name {
-  font-size: 28px;
-  color: #333;
-  margin-bottom: 5px;
-}
-
-.profile-username {
-  font-size: 16px;
-  color: #777;
-  margin-bottom: 10px;
-}
-
-.profile-bio {
-  font-size: 18px;
-  color: #555;
-  margin-bottom: 15px;
-}
-
-/* Profile Stats */
-.profile-stats {
-  display: flex;
-  gap: 30px;
-}
-
-.profile-stats div {
-  font-size: 18px;
-  color: #333;
-}
-
-/* Post Grid */
-.post-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 15px;
-}
-
-/* Post Item */
-.post-item {
-  overflow: hidden;
-  border-radius: 15px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* Post Image */
-.post-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  border-radius: 15px;
-  transition: transform 0.3s ease;
-}
-
-.post-item:hover .post-image {
-  transform: scale(1.05);
-}
-
-/* Edit Profile Button */
-.edit-profile-button {
-  margin-top: 15px;
-  padding: 8px 16px;
-  background-color: #3897f0;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.edit-profile-button:hover {
-  background-color: #3178b8;
-}
-
-/* Avatar */
-.avatar img {
-  width: auto;
-  height: 50px;
-}
-
-/* Keyframe Animation for Fade-in Effect */
+/* Animation for Fade-In */
 @keyframes fadeIn {
-  0% {
+  from {
     opacity: 0;
+    transform: translateY(10px);
   }
-  100% {
+  to {
     opacity: 1;
+    transform: translateY(0);
   }
+}
+
+.add-container,
+.posts-container {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Comment Box */
+.comment-box {
+  background: rgba(76, 175, 80, 0.2);
+  border-radius: 8px;
+  padding: 10px;
+  /* Corrected property name */
+  backface-visibility: hidden;
+}
+
+.comment-box h1 {
+  font-size: 1.5rem;
+  color: #de87e6;
+}
+
+/* Fade-in animation for new comments */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.comment-scroll {
+  flex: 1;
+  overflow-y: auto;     
+}
+
+.comment-scroll::-webkit-scrollbar {
+  display: none; 
+}
+
+/* Dark Theme Override for Comment Box */
+.app-container.dark .comment-box {
+  /* Override to a dark gray tone so it doesn't appear pure white */
+  background: #2a2a2a;
 }

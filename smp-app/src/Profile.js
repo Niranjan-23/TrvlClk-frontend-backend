@@ -1,4 +1,3 @@
-// Profile.jsx
 import React, { useState, useEffect, useRef } from "react";
 import "./Profile.css";
 import IconButton from "@mui/material/IconButton";
@@ -7,7 +6,6 @@ import CloseIcon from "@mui/icons-material/Close";
 import API_BASE_URL from './config';
 
 const Profile = ({ user, onUserUpdate, onEditClick }) => {
-  // Initialize with an empty object if user is undefined
   const [localUser, setLocalUser] = useState(user || {});
   const [userPosts, setUserPosts] = useState([]);
   const [showFollowers, setShowFollowers] = useState(false);
@@ -16,7 +14,6 @@ const Profile = ({ user, onUserUpdate, onEditClick }) => {
   const followersRef = useRef(null);
   const followingRef = useRef(null);
 
-  // Update localUser when the user prop changes and fetch posts
   useEffect(() => {
     setLocalUser(user || {});
     const fetchUserPosts = async () => {
@@ -36,7 +33,6 @@ const Profile = ({ user, onUserUpdate, onEditClick }) => {
     fetchUserPosts();
   }, [user]);
 
-  // Fetch the latest user data from the backend
   const fetchCurrentUser = async () => {
     if (!user || !user._id) return;
     try {
@@ -44,7 +40,6 @@ const Profile = ({ user, onUserUpdate, onEditClick }) => {
       const response = await fetch(`${API_BASE_URL}/api/user/${user._id}`);
       if (!response.ok) throw new Error("Failed to fetch user");
       const data = await response.json();
-      // Ensure followers and following are arrays
       setLocalUser({
         ...data.user,
         followers: data.user.followers || [],
@@ -77,25 +72,19 @@ const Profile = ({ user, onUserUpdate, onEditClick }) => {
   };
 
   useEffect(() => {
-    if (showFollowers && followersRef.current) {
-      const content = followersRef.current;
-      if (content.scrollHeight > content.clientHeight) {
-        content.classList.add("overflow");
-      } else {
-        content.classList.remove("overflow");
-      }
-    }
-    if (showFollowing && followingRef.current) {
-      const content = followingRef.current;
-      if (content.scrollHeight > content.clientHeight) {
-        content.classList.add("overflow");
-      } else {
-        content.classList.remove("overflow");
-      }
-    }
-  }, [showFollowers, showFollowing, localUser]);
+    const handleModalTransition = () => {
+      const overlays = document.querySelectorAll('.modal-overlay');
+      overlays.forEach(overlay => {
+        if (showFollowers || showFollowing) {
+          overlay.classList.add('visible');
+        } else {
+          overlay.classList.remove('visible');
+        }
+      });
+    };
+    handleModalTransition();
+  }, [showFollowers, showFollowing]);
 
-  // Delete post using new posts endpoint
   const handleDeletePost = async (postId) => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/posts/${postId}`, {
@@ -110,21 +99,18 @@ const Profile = ({ user, onUserUpdate, onEditClick }) => {
         return;
       }
       await response.json();
-      // Remove the deleted post from local state
       setUserPosts(userPosts.filter(post => post._id !== postId));
     } catch (error) {
       console.error("Error deleting post:", error);
     }
   };
 
-  // Create a safe user object ensuring followers and following are arrays
   const safeUser = {
     ...localUser,
     followers: localUser.followers || [],
     following: localUser.following || [],
   };
 
-  // If no user data is available, render a fallback
   if (!localUser || !localUser._id)
     return <div className="profile-container">No user data available.</div>;
 
@@ -156,7 +142,7 @@ const Profile = ({ user, onUserUpdate, onEditClick }) => {
       </div>
       <div className="post-grid">
         {userPosts.map((post) => (
-          <div className="post-item" key={post._id} style={{ position: "relative" }}>
+          <div className="post-item" key={post._id}>
             <img src={post.imageUrl} alt="Post" className="post-image" />
             <IconButton
               onClick={() => handleDeletePost(post._id)}
@@ -175,7 +161,10 @@ const Profile = ({ user, onUserUpdate, onEditClick }) => {
           <div className="list-container" onClick={(e) => e.stopPropagation()}>
             <div className="list-header">
               <h2>Followers</h2>
-              <IconButton onClick={() => setShowFollowers(false)}>
+              <IconButton
+                onClick={() => setShowFollowers(false)}
+                style={{ position: "absolute", top: 10, right: 10 }}
+              >
                 <CloseIcon />
               </IconButton>
             </div>
@@ -183,8 +172,8 @@ const Profile = ({ user, onUserUpdate, onEditClick }) => {
               {loading ? (
                 <p>Loading...</p>
               ) : safeUser.followers.length > 0 ? (
-                safeUser.followers.map((follower) => (
-                  <div key={follower._id} className="list-item">
+                safeUser.followers.slice(0, 5).map((follower, index) => (
+                  <div key={follower._id} className="list-item" style={{ animationDelay: `${index * 0.1}s` }}>
                     <img src={follower.profileImage} alt={follower.username} />
                     <span>{follower.username}</span>
                   </div>
@@ -203,7 +192,10 @@ const Profile = ({ user, onUserUpdate, onEditClick }) => {
           <div className="list-container" onClick={(e) => e.stopPropagation()}>
             <div className="list-header">
               <h2>Following</h2>
-              <IconButton onClick={() => setShowFollowing(false)}>
+              <IconButton
+                onClick={() => setShowFollowing(false)}
+                style={{ position: "absolute", top: 10, right: 10 }}
+              >
                 <CloseIcon />
               </IconButton>
             </div>
@@ -211,8 +203,8 @@ const Profile = ({ user, onUserUpdate, onEditClick }) => {
               {loading ? (
                 <p>Loading...</p>
               ) : safeUser.following.length > 0 ? (
-                safeUser.following.map((followed) => (
-                  <div key={followed._id} className="list-item">
+                safeUser.following.slice(0, 5).map((followed, index) => (
+                  <div key={followed._id} className="list-item" style={{ animationDelay: `${index * 0.1}s` }}>
                     <img src={followed.profileImage} alt={followed.username} />
                     <span>{followed.username}</span>
                   </div>
