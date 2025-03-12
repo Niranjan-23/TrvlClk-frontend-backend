@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const conversationsRoutes = require('./routes/conversations');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -27,7 +28,7 @@ app.use('/api', usersRoutes);
 app.use('/api', postRoutes);
 app.use('/api', commentsRoutes);
 app.use('/api', searchRoutes);
-
+app.use('/api', conversationsRoutes);
 // Serve Static Files
 app.use(express.static('public'));
 

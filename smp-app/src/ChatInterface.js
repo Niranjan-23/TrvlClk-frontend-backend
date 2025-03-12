@@ -5,10 +5,13 @@ import TextField from "@mui/material/TextField";
 import IconButton from "@mui/material/IconButton";
 import SearchIcon from "@mui/icons-material/Search";
 import API_BASE_URL from "./config";
+import { formatDistanceToNow } from "date-fns";
 import "./ChatInterface.css";
 
 const ChatInterface = ({ loggedInUser }) => {
   const { recipientId } = useParams();
+  // allFollowers for search dropdown; chatUsers for sidebar (only with messages)
+  const [allFollowers, setAllFollowers] = useState([]);
   const [chatUsers, setChatUsers] = useState([]);
   const [activeChat, setActiveChat] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -19,6 +22,53 @@ const ChatInterface = ({ loggedInUser }) => {
   const [error, setError] = useState(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const searchRef = useRef(null);
+
+  // Helper to format timestamps relative to now
+  const formatRelativeTime = (timestamp) => {
+    const messageDate = new Date(timestamp);
+    const now = new Date();
+    const diff = now - messageDate;
+    const seconds = Math.floor(diff / 1000);
+    if (seconds < 60) return "just now";
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes} minute${minutes !== 1 ? "s" : ""} ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} hour${hours !== 1 ? "s" : ""} ago`;
+    const days = Math.floor(hours / 24);
+    return `${days} day${days !== 1 ? "s" : ""} ago`;
+  };
+
+  // Helper to fetch conversation for a given follower
+  const fetchConversationForFollower = async (follower) => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/conversations/${loggedInUser._id}/${follower.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (!response.ok) return { ...follower, messages: [] };
+      const data = await response.json();
+      return { ...follower, messages: data.conversation.messages || [] };
+    } catch (error) {
+      console.error("Error fetching conversation for follower", follower.id, error);
+      return { ...follower, messages: [] };
+    }
+  };
+
+  // Fetch conversations for all followers and return only those with messages
+  const fetchConversationsForAllFollowers = async (followers) => {
+    const conversationPromises = followers.map((follower) =>
+      fetchConversationForFollower(follower)
+    );
+    const followersWithConversations = await Promise.all(conversationPromises);
+    return followersWithConversations.filter(
+      (follower) => follower.messages.length > 0
+    );
+  };
 
   // Fetch followers from the backend
   const fetchFollowers = async () => {
@@ -34,25 +84,29 @@ const ChatInterface = ({ loggedInUser }) => {
           "Content-Type": "application/json",
         },
       });
-      if (!response.ok) {
-        throw new Error("Failed to fetch user data");
-      }
+      if (!response.ok) throw new Error("Failed to fetch user data");
       const data = await response.json();
       const followers = data.user.followers || [];
       const mappedFollowers = followers.map((follower) => ({
         id: follower._id,
         name: follower.username || follower.name || "Unknown",
-        profileImage: follower.profileImage || "/default-avatar.png", // Ensure profileImage is included
+        profileImage: follower.profileImage || "/default-avatar.png",
       }));
-      setChatUsers(mappedFollowers);
+      // Save all followers for search
+      setAllFollowers(mappedFollowers);
+      // Filter followers with conversation for the chat list
+      const followersWithConversations = await fetchConversationsForAllFollowers(mappedFollowers);
+      setChatUsers(followersWithConversations);
+      // Set initial filteredUsers for search to all followers
       setFilteredUsers(mappedFollowers);
 
-      if (mappedFollowers.length > 0) {
+      if (followersWithConversations.length > 0) {
         const initialChat = recipientId
-          ? mappedFollowers.find((user) => user.id === recipientId) || mappedFollowers[0]
-          : mappedFollowers[0];
+          ? followersWithConversations.find((user) => user.id === recipientId) ||
+            followersWithConversations[0]
+          : followersWithConversations[0];
         setActiveChat(initialChat);
-        fetchMessages(initialChat.id);
+        fetchConversation(initialChat.id);
       }
     } catch (err) {
       console.error("Error fetching followers:", err);
@@ -62,12 +116,12 @@ const ChatInterface = ({ loggedInUser }) => {
     }
   };
 
-  // Fetch messages for a specific chat
-  const fetchMessages = async (recipientId) => {
+  // Fetch conversation between loggedInUser and active chat user
+  const fetchConversation = async (recipientId) => {
     if (!loggedInUser || !recipientId) return;
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/messages/${loggedInUser._id}/${recipientId}`,
+        `${API_BASE_URL}/api/conversations/${loggedInUser._id}/${recipientId}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -75,18 +129,17 @@ const ChatInterface = ({ loggedInUser }) => {
           },
         }
       );
-      if (!response.ok) {
-        throw new Error("Failed to fetch messages");
-      }
+      if (!response.ok) throw new Error("Failed to fetch conversation");
       const data = await response.json();
-      setMessages(data.messages || []);
+      setMessages(data.conversation.messages || []);
     } catch (err) {
-      console.error("Error fetching messages:", err);
+      console.error("Error fetching conversation:", err);
+      setError("Could not load conversation. Please try again.");
       setMessages([]);
     }
   };
 
-  // Debounce function
+  // Debounce function for search
   const debounce = (func, delay) => {
     let timeoutId;
     return (...args) => {
@@ -95,13 +148,13 @@ const ChatInterface = ({ loggedInUser }) => {
     };
   };
 
-  // Filter chat users locally
+  // Filter users for search from all followers
   const filterUsers = (query) => {
     if (!query || query.trim() === "") {
       setFilteredUsers([]);
       setShowDropdown(false);
     } else {
-      const filtered = chatUsers.filter((user) =>
+      const filtered = allFollowers.filter((user) =>
         user.name.toLowerCase().includes(query.toLowerCase())
       );
       setFilteredUsers(filtered);
@@ -109,7 +162,7 @@ const ChatInterface = ({ loggedInUser }) => {
     }
   };
 
-  const debouncedFilterUsers = useCallback(debounce(filterUsers, 300), [chatUsers]);
+  const debouncedFilterUsers = useCallback(debounce(filterUsers, 300), [allFollowers]);
 
   const handleSearchChange = (event) => {
     const query = event.target.value;
@@ -119,12 +172,12 @@ const ChatInterface = ({ loggedInUser }) => {
 
   const handleSearchSelect = (user) => {
     setActiveChat(user);
-    fetchMessages(user.id);
+    fetchConversation(user.id);
     setSearchQuery("");
     setShowDropdown(false);
   };
 
-  // Close dropdown if clicking outside
+  // Close search dropdown if clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
@@ -135,15 +188,11 @@ const ChatInterface = ({ loggedInUser }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Send a message using the conversation endpoint
   const sendMessage = async () => {
     if (newMessage.trim() === "" || !activeChat) return;
-    const newMsg = {
-      id: messages.length + 1,
-      text: newMessage,
-      sender: "me",
-    };
     try {
-      const response = await fetch(`${API_BASE_URL}/api/messages`, {
+      const response = await fetch(`${API_BASE_URL}/api/conversations`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -156,13 +205,27 @@ const ChatInterface = ({ loggedInUser }) => {
         }),
       });
       if (response.ok) {
-        setMessages([...messages, newMsg]);
+        const data = await response.json();
+        setMessages(data.conversation.messages);
         setNewMessage("");
+        // If this conversation didn't exist before, add it to chatUsers
+        if (!chatUsers.find((user) => user.id === activeChat.id)) {
+          const updatedUser = await fetchConversationForFollower(activeChat);
+          if (updatedUser.messages.length > 0) {
+            setChatUsers((prev) => [...prev, updatedUser]);
+          }
+        }
       } else {
         console.error("Failed to send message:", response.status);
       }
     } catch (error) {
       console.error("Error sending message:", error);
+      const newMsg = {
+        id: messages.length + 1,
+        text: newMessage,
+        sender: loggedInUser._id,
+        createdAt: new Date(),
+      };
       setMessages([...messages, newMsg]);
       setNewMessage("");
     }
@@ -224,7 +287,7 @@ const ChatInterface = ({ loggedInUser }) => {
               </li>
             ))
           ) : (
-            <li>No followers to chat with</li>
+            <li>No chats available</li>
           )}
         </ul>
       </div>
@@ -236,22 +299,38 @@ const ChatInterface = ({ loggedInUser }) => {
               <h2>{activeChat.name}</h2>
             </div>
             <div className="chat-messages">
-              {messages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className={`message-row ${msg.sender === "me" ? "sent-row" : "received-row"}`}
-                >
-                  {msg.sender === "them" && (
-                    <Avatar src={activeChat.profileImage} className="message-avatar" />
-                  )}
-                  <div className={msg.sender === "me" ? "sent" : "received"}>
-                    {msg.text}
-                  </div>
-                  {msg.sender === "me" && (
-                    <Avatar src={loggedInUser.profileImage} className="message-avatar" />
-                  )}
-                </div>
-              ))}
+              {messages.length > 0 ? (
+                messages.map((msg, index) => {
+                  const isSent = msg.sender === loggedInUser._id;
+                  return (
+                    <div
+                      key={index}
+                      className={`message-row ${isSent ? "sent-row" : "received-row"}`}
+                    >
+                      {!isSent && (
+                        <Avatar
+                          src={activeChat.profileImage}
+                          className="message-avatar"
+                        />
+                      )}
+                      <div className={isSent ? "sent" : "received"}>
+                        {msg.text}
+                        <div className="message-time">
+                          {formatRelativeTime(msg.createdAt)}
+                        </div>
+                      </div>
+                      {isSent && (
+                        <Avatar
+                          src={loggedInUser.profileImage}
+                          className="message-avatar"
+                        />
+                      )}
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="no-messages">Start a convo!</div>
+              )}
             </div>
             <div className="chat-input">
               <input
