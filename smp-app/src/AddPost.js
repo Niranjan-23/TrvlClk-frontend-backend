@@ -1,15 +1,17 @@
+// AddPost.js
 import React, { useState } from "react";
-import { styled } from "@mui/material/styles";
 import Button from "@mui/material/Button";
 import BackupTwoToneIcon from "@mui/icons-material/BackupTwoTone";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
+import TextField from '@mui/material/TextField';
 import "./AddPost.css";
 import API_BASE_URL from "./config";
-
 
 export default function AddPost({ user, onPostAdded = () => {} }) {
   const [previewUrl, setPreviewUrl] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [location, setLocation] = useState("");
+  const [description, setDescription] = useState("");
 
   // Prompt for an image URL
   const handleUploadClick = () => {
@@ -21,34 +23,40 @@ export default function AddPost({ user, onPostAdded = () => {} }) {
   };
 
   const handlePost = async () => {
-    console.log("handlePost triggered", { imageUrl, user });
-  
     if (!imageUrl?.trim() || !user?._id) {
       console.error("Image URL is empty or user ID is missing");
       return;
     }
-  
+
     try {
       const response = await fetch(`${API_BASE_URL}/api/posts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user._id, imageUrl: imageUrl.trim() }),
+        body: JSON.stringify({
+          userId: user._id,
+          imageUrl: imageUrl.trim(),
+          location: location.trim(),
+          description: description.trim(),
+        }),
       });
-  
+
       if (!response.ok) {
         const errorData = await response.json();
         console.error("Error adding post:", errorData.error || "Unknown error");
         return;
       }
-  
+
       const data = await response.json();
       console.log("Post added successfully:", data.post);
-  
-      // Trigger callback to refresh timeline; do not update the loggedInUser state.
+
+      // Trigger callback to refresh timeline
       onPostAdded();
-  
+
+      // Clear fields
       setPreviewUrl("");
       setImageUrl("");
+      setLocation("");
+      setDescription("");
     } catch (error) {
       console.error("Error adding post:", error);
     }
@@ -59,6 +67,24 @@ export default function AddPost({ user, onPostAdded = () => {} }) {
       {previewUrl ? (
         <>
           <img src={previewUrl} alt="Selected Preview" />
+          <div className="input-fields">
+            <TextField
+              label="Description"
+              variant="outlined"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Location"
+              variant="outlined"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              fullWidth
+              margin="normal"
+            />
+          </div>
           <div className="post-button">
             <Button
               type="button"

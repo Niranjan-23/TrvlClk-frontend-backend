@@ -1,3 +1,4 @@
+// controllers/postController.js
 const Post = require('../models/Post');
 const User = require('../models/User');
 const { handleDBError } = require('../utils/helpers');
@@ -5,7 +6,7 @@ const mongoose = require('mongoose');
 
 exports.createPost = async (req, res) => {
   try {
-    const { userId, imageUrl } = req.body;
+    const { userId, imageUrl, location, description } = req.body;
     if (!imageUrl || typeof imageUrl !== 'string' || imageUrl.trim() === '') {
       return res.status(400).json({ error: 'A valid image URL is required' });
     }
@@ -18,9 +19,12 @@ exports.createPost = async (req, res) => {
       user: userId,
       imageUrl: imageUrl.trim(),
       likes: [],
+      location: location ? location.trim() : '',
+      description: description ? description.trim() : '',
     });
     await newPost.save();
-    const populatedPost = await Post.findById(newPost._id).populate('user', 'username profileImage');
+    const populatedPost = await Post.findById(newPost._id)
+      .populate('user', 'username profileImage');
     res.status(201).json({ post: populatedPost });
   } catch (error) {
     handleDBError(res, error);

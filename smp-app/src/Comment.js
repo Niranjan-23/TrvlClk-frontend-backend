@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Avatar, Grid, Paper, Divider, TextField, Button } from '@mui/material';
+import { Avatar, Grid, Paper, Divider, TextField, Button, IconButton } from '@mui/material';
 import './Comment.css';
 import SendIcon from '@mui/icons-material/Send';
+import DeleteIcon from '@mui/icons-material/Delete';
 import API_BASE_URL from './config';
 
 // Utility function for relative time
@@ -74,6 +75,23 @@ export default function Comment({ postId, loggedInUser }) {
     }
   };
 
+  // Function to handle deletion of a comment
+  const handleDeleteComment = async (commentId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/posts/${postId}/comments/${commentId}`, {
+        method: 'DELETE'
+      });
+      if (response.ok) {
+        // Remove the deleted comment from state
+        setComments(comments.filter(comment => comment._id !== commentId));
+      } else {
+        console.error('Error deleting comment');
+      }
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+    }
+  };
+
   return (
     <div style={{ padding: 14 }} className="comment-box">
       <h1>Comments</h1>
@@ -81,7 +99,7 @@ export default function Comment({ postId, loggedInUser }) {
         style={{
           display: 'flex',
           flexDirection: 'column',
-          height: '350px',
+          height: '400px',
           overflow: 'hidden',
           padding: '20px',
         }}
@@ -97,16 +115,22 @@ export default function Comment({ postId, loggedInUser }) {
                 animation: 'fadeIn 0.5s',
               }}
             >
-              <Grid container wrap="nowrap" spacing={2}>
+              <Grid container wrap="nowrap" spacing={2} alignItems="center">
                 <Grid item>
                   <Avatar alt={comment.user.username} src={comment.user.profileImage} />
                 </Grid>
-                <Grid justifyContent="left" item xs zeroMinWidth>
+                <Grid item xs zeroMinWidth>
                   <h4 style={{ margin: 0, textAlign: 'left' }}>{comment.user.username}</h4>
                   <p style={{ textAlign: 'left' }}>{comment.text}</p>
                   <p style={{ textAlign: 'left', color: 'gray' }}>
                     {getRelativeTime(comment.createdAt)}
                   </p>
+                </Grid>
+                <Grid item>
+                  {/* Delete button */}
+                  <IconButton color="secondary" onClick={() => handleDeleteComment(comment._id)}>
+                    <DeleteIcon fontSize='small'/>
+                  </IconButton>
                 </Grid>
               </Grid>
               <Divider variant="fullWidth" style={{ margin: '20px 0' }} />
