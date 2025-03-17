@@ -3,17 +3,17 @@ import { useParams } from "react-router-dom";
 import Avatar from "@mui/material/Avatar";
 import TextField from "@mui/material/TextField";
 import IconButton from "@mui/material/IconButton";
+import DeleteIcon from "@mui/icons-material/Delete";
 import SearchIcon from "@mui/icons-material/Search";
 import API_BASE_URL from "./config";
-import { formatDistanceToNow } from "date-fns";
 import "./ChatInterface.css";
 
 const ChatInterface = ({ loggedInUser }) => {
   const { recipientId } = useParams();
-  // allFollowers for search dropdown; chatUsers for sidebar (only with messages)
   const [allFollowers, setAllFollowers] = useState([]);
   const [chatUsers, setChatUsers] = useState([]);
   const [activeChat, setActiveChat] = useState(null);
+  const [conversationId, setConversationId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [messages, setMessages] = useState([]);
@@ -52,6 +52,9 @@ const ChatInterface = ({ loggedInUser }) => {
       );
       if (!response.ok) return { ...follower, messages: [] };
       const data = await response.json();
+      if (data.conversation && data.conversation._id) {
+        follower.conversationId = data.conversation._id;
+      }
       return { ...follower, messages: data.conversation.messages || [] };
     } catch (error) {
       console.error("Error fetching conversation for follower", follower.id, error);
@@ -92,12 +95,11 @@ const ChatInterface = ({ loggedInUser }) => {
         name: follower.username || follower.name || "Unknown",
         profileImage: follower.profileImage || "/default-avatar.png",
       }));
-      // Save all followers for search
       setAllFollowers(mappedFollowers);
-      // Filter followers with conversation for the chat list
-      const followersWithConversations = await fetchConversationsForAllFollowers(mappedFollowers);
+      const followersWithConversations = await fetchConversationsForAllFollowers(
+        mappedFollowers
+      );
       setChatUsers(followersWithConversations);
-      // Set initial filteredUsers for search to all followers
       setFilteredUsers(mappedFollowers);
 
       if (followersWithConversations.length > 0) {
@@ -131,6 +133,9 @@ const ChatInterface = ({ loggedInUser }) => {
       );
       if (!response.ok) throw new Error("Failed to fetch conversation");
       const data = await response.json();
+      if (data.conversation && data.conversation._id) {
+        setConversationId(data.conversation._id);
+      }
       setMessages(data.conversation.messages || []);
     } catch (err) {
       console.error("Error fetching conversation:", err);
@@ -148,7 +153,6 @@ const ChatInterface = ({ loggedInUser }) => {
     };
   };
 
-  // Filter users for search from all followers
   const filterUsers = (query) => {
     if (!query || query.trim() === "") {
       setFilteredUsers([]);
@@ -177,7 +181,6 @@ const ChatInterface = ({ loggedInUser }) => {
     setShowDropdown(false);
   };
 
-  // Close search dropdown if clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
@@ -206,9 +209,11 @@ const ChatInterface = ({ loggedInUser }) => {
       });
       if (response.ok) {
         const data = await response.json();
+        if (data.conversation && data.conversation._id) {
+          setConversationId(data.conversation._id);
+        }
         setMessages(data.conversation.messages);
         setNewMessage("");
-        // If this conversation didn't exist before, add it to chatUsers
         if (!chatUsers.find((user) => user.id === activeChat.id)) {
           const updatedUser = await fetchConversationForFollower(activeChat);
           if (updatedUser.messages.length > 0) {
@@ -231,6 +236,30 @@ const ChatInterface = ({ loggedInUser }) => {
     }
   };
 
+  // Function for deleting an individual message using pull
+  const deleteMessage = async (messageId) => {
+    if (!conversationId) return;
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/conversations/${conversationId}/messages/${messageId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Failed to delete message");
+      }
+      const data = await response.json();
+      setMessages(data.conversation.messages);
+    } catch (err) {
+      console.error("Error deleting message:", err);
+    }
+  };
+
   useEffect(() => {
     fetchFollowers();
   }, [loggedInUser, recipientId]);
@@ -240,6 +269,7 @@ const ChatInterface = ({ loggedInUser }) => {
 
   return (
     <div className="chat-interface">
+      {/* ===== SIDEBAR ===== */}
       <div className="chat-sidebar">
         <h3>Chats</h3>
         <div className="chat-search" ref={searchRef}>
@@ -291,6 +321,8 @@ const ChatInterface = ({ loggedInUser }) => {
           )}
         </ul>
       </div>
+
+      {/* ===== MAIN CHAT AREA ===== */}
       <div className="chat-main">
         {activeChat ? (
           <>
@@ -304,26 +336,44 @@ const ChatInterface = ({ loggedInUser }) => {
                   const isSent = msg.sender === loggedInUser._id;
                   return (
                     <div
-                      key={index}
+                      key={msg._id || index}
                       className={`message-row ${isSent ? "sent-row" : "received-row"}`}
                     >
-                      {!isSent && (
-                        <Avatar
-                          src={activeChat.profileImage}
-                          className="message-avatar"
-                        />
-                      )}
-                      <div className={isSent ? "sent" : "received"}>
-                        {msg.text}
-                        <div className="message-time">
-                          {formatRelativeTime(msg.createdAt)}
-                        </div>
-                      </div>
-                      {isSent && (
-                        <Avatar
-                          src={loggedInUser.profileImage}
-                          className="message-avatar"
-                        />
+                      {isSent ? (
+                        <>
+                          {/* Material UI IconButton with DeleteIcon on the left */}
+                          <IconButton
+                            onClick={() => deleteMessage(msg._id)}
+                            size="small"
+                            color="grey"
+                            style={{ marginRight: "5px" }}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                          <div className="sent">
+                            {msg.text}
+                            <div className="message-time">
+                              {formatRelativeTime(msg.createdAt)}
+                            </div>
+                          </div>
+                          <Avatar
+                            src={loggedInUser.profileImage}
+                            className="message-avatar"
+                          />
+                        </>
+                      ) : (
+                        <>
+                          <Avatar
+                            src={activeChat.profileImage}
+                            className="message-avatar"
+                          />
+                          <div className="received">
+                            {msg.text}
+                            <div className="message-time">
+                              {formatRelativeTime(msg.createdAt)}
+                            </div>
+                          </div>
+                        </>
                       )}
                     </div>
                   );

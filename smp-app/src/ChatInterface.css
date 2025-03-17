@@ -58,7 +58,7 @@
 }
 
 .chat-search {
-  margin-bottom: 20px; /* Added gap between search and chat list */
+  margin-bottom: 20px;
   position: relative;
 }
 
@@ -358,12 +358,12 @@
 }
 
 .dark .chat-sidebar h3 {
-  color: #e0e0e0; /* Lighter gray for visibility */
+  color: #e0e0e0;
 }
 
 .dark .sidebar-name,
 .dark .dropdown-name {
-  color: #e0e0e0; /* Lighter gray for visibility */
+  color: #e0e0e0;
 }
 
 .dark .chat-header {
@@ -371,7 +371,7 @@
 }
 
 .dark .chat-header h2 {
-  color: #e0e0e0; /* Lighter gray for visibility */
+  color: #e0e0e0;
 }
 
 .dark .chat-messages {
@@ -448,9 +448,21 @@
 
 .message-timestamp {
   font-size: 10px;
-  color: rgba(255, 255, 255, 0.6); /* Light translucent text */
+  color: rgba(255, 255, 255, 0.6);
   display: block;
   margin-top: 2px;
   text-align: right;
 }
 
+.delete-btn {
+  background: transparent;
+  border: none;
+  color: #d00;
+  cursor: pointer;
+  font-size: 0.8rem;
+  margin-left: 8px;
+}
+
+.delete-btn:hover {
+  text-decoration: underline;
+}
