@@ -9,20 +9,26 @@ import Comment from './Comment';
 import { Avatar } from '@mui/material';
 import API_BASE_URL from './config';
 import { useNavigate } from 'react-router-dom';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemAvatar from '@mui/material/ListItemAvatar';
+import ListItemText from '@mui/material/ListItemText';
 
-const Post = ({ post, loggedInUser }) => {
-  const [showComments, setShowComments] = useState(false);
+const Post = ({ post, loggedInUser, showCommentsByDefault = false }) => {
+  const [showComments, setShowComments] = useState(showCommentsByDefault);
   const [postLikes, setPostLikes] = useState(post.likes || []);
+  const [followers, setFollowers] = useState([]);
+  const [openSendDialog, setOpenSendDialog] = useState(false);
   const postContainerRef = useRef(null);
-  const commentAreaRef = useRef(null);
   const navigate = useNavigate();
 
   const hasLiked = postLikes.some(id => id.toString() === loggedInUser._id);
 
   useEffect(() => {
-    if (showComments && postContainerRef.current && commentAreaRef.current) {
-      const height = postContainerRef.current.clientHeight;
-      commentAreaRef.current.style.height = `${height}px`;
+    if (showComments && postContainerRef.current) {
+      // Example: adjust comment area height if needed
     }
   }, [showComments]);
 
@@ -45,7 +51,7 @@ const Post = ({ post, loggedInUser }) => {
   };
 
   const handleCommentToggle = () => {
-    setShowComments((prev) => !prev);
+    setShowComments(prev => !prev);
   };
 
   const handleProfileClick = () => {
@@ -53,6 +59,62 @@ const Post = ({ post, loggedInUser }) => {
       navigate(`/profile`);
     } else {
       navigate(`/user/${post.user._id}`);
+    }
+  };
+
+  const fetchFollowers = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/user/${loggedInUser._id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok) {
+        console.error("Failed to fetch followers");
+        return;
+      }
+      const data = await response.json();
+      const fetchedFollowers = data.user.followers || [];
+      const mappedFollowers = fetchedFollowers.map(follower => ({
+        id: follower._id,
+        name: follower.username || follower.name || "Unknown",
+        profileImage: follower.profileImage || '/default-avatar.png'
+      }));
+      setFollowers(mappedFollowers);
+    } catch (error) {
+      console.error("Error fetching followers:", error);
+    }
+  };
+
+  const handleSendClick = () => {
+    if (followers.length === 0) {
+      fetchFollowers();
+    }
+    setOpenSendDialog(true);
+  };
+
+  const handleFollowerSelect = async (follower) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/conversations`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          senderId: loggedInUser._id,
+          recipientId: follower.id,
+          text: `Check out this post: ${post.imageUrl}`,
+        }),
+      });
+      if (!response.ok) {
+        console.error('Failed to send post preview');
+        return;
+      }
+      setOpenSendDialog(false);
+    } catch (error) {
+      console.error("Error sending post preview:", error);
     }
   };
 
@@ -73,7 +135,7 @@ const Post = ({ post, loggedInUser }) => {
               <Button onClick={handleCommentToggle} className="action-btn">
                 <ChatBubbleTwoToneIcon fontSize="medium" />
               </Button>
-              <Button className="action-btn">
+              <Button onClick={handleSendClick} className="action-btn">
                 <SendTwoToneIcon fontSize="medium" />
               </Button>
             </div>
@@ -98,10 +160,24 @@ const Post = ({ post, loggedInUser }) => {
         </div>
       </div>
       {showComments && (
-        <div className="comment-area" ref={commentAreaRef}>
+        <div className="comment-area">
           <Comment postId={post._id} loggedInUser={loggedInUser} />
         </div>
       )}
+
+      <Dialog onClose={() => setOpenSendDialog(false)} open={openSendDialog}>
+        <DialogTitle>Select a follower to send the post preview</DialogTitle>
+        <List>
+          {followers.map(follower => (
+            <ListItem button onClick={() => handleFollowerSelect(follower)} key={follower.id}>
+              <ListItemAvatar>
+                <Avatar src={follower.profileImage} />
+              </ListItemAvatar>
+              <ListItemText primary={follower.name} />
+            </ListItem>
+          ))}
+        </List>
+      </Dialog>
     </div>
   );
 };

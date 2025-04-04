@@ -7,7 +7,8 @@
   border-radius: 12px;
   overflow: hidden;
   background: linear-gradient(135deg, #f5f7fa, #e4e9f0);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08), 0 0 40px rgba(0, 132, 255, 0.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08),
+    0 0 40px rgba(0, 132, 255, 0.05);
   transition: background 0.4s ease, transform 0.3s ease;
 }
 
@@ -205,11 +206,21 @@
   animation: fadeIn 0.3s ease-out forwards;
 }
 
-.message-row:nth-child(1) { animation-delay: 0.05s; }
-.message-row:nth-child(2) { animation-delay: 0.1s; }
-.message-row:nth-child(3) { animation-delay: 0.15s; }
-.message-row:nth-child(4) { animation-delay: 0.2s; }
-.message-row:nth-child(n+5) { animation-delay: 0.25s; }
+.message-row:nth-child(1) {
+  animation-delay: 0.05s;
+}
+.message-row:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.message-row:nth-child(3) {
+  animation-delay: 0.15s;
+}
+.message-row:nth-child(4) {
+  animation-delay: 0.2s;
+}
+.message-row:nth-child(n+5) {
+  animation-delay: 0.25s;
+}
 
 @keyframes fadeIn {
   from {
@@ -236,13 +247,15 @@
   padding: 12px 16px;
   border-radius: 12px 12px 0 12px;
   max-width: 65%;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1), 0 0 10px rgba(0, 132, 255, 0.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1),
+    0 0 10px rgba(0, 132, 255, 0.2);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .sent:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 0 15px rgba(0, 132, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15),
+    0 0 15px rgba(0, 132, 255, 0.3);
 }
 
 .received {
@@ -263,6 +276,18 @@
 .message-avatar {
   width: 28px;
   height: 28px;
+}
+
+/* Chat Image Styling */
+.chat-image {
+  max-width: 150px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.chat-image:hover {
+  transform: scale(1.05);
 }
 
 /* Chat Input Styling */
@@ -340,7 +365,8 @@
 /* Dark Mode Overrides */
 .dark .chat-interface {
   background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 102, 204, 0.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3),
+    0 0 40px rgba(0, 102, 204, 0.05);
 }
 
 .dark .chat-sidebar {
@@ -380,11 +406,13 @@
 
 .dark .sent {
   background: linear-gradient(135deg, #0066cc, #004d99);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2), 0 0 10px rgba(0, 102, 204, 0.3);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2),
+    0 0 10px rgba(0, 102, 204, 0.3);
 }
 
 .dark .sent:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25), 0 0 15px rgba(0, 102, 204, 0.4);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25),
+    0 0 15px rgba(0, 102, 204, 0.4);
 }
 
 .dark .received {
@@ -454,6 +482,7 @@
   text-align: right;
 }
 
+/* Unused delete-btn styles (using Material UI IconButton now) */
 .delete-btn {
   background: transparent;
   border: none;

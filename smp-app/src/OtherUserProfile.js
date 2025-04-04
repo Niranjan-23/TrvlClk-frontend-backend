@@ -5,6 +5,7 @@ import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import API_BASE_URL from "./config";
+import Post from "./Post";
 import "./Profile.css";
 
 const OtherUserProfile = ({ user: propUser, loggedInUser, onUserUpdate }) => {
@@ -12,6 +13,7 @@ const OtherUserProfile = ({ user: propUser, loggedInUser, onUserUpdate }) => {
   const [localUser, setLocalUser] = useState(propUser || {});
   const [userPosts, setUserPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedPost, setSelectedPost] = useState(null);
   const [showFollowersModal, setShowFollowersModal] = useState(false);
   const [showFollowingModal, setShowFollowingModal] = useState(false);
   const followersRef = useRef(null);
@@ -23,8 +25,6 @@ const OtherUserProfile = ({ user: propUser, loggedInUser, onUserUpdate }) => {
         const response = await fetch(`${API_BASE_URL}/api/user/${userId}`);
         if (response.ok) {
           const data = await response.json();
-          console.log("Fetched user data:", data.user);
-          console.log("Follow requests:", data.user.followRequests);
           setLocalUser(data.user);
         } else {
           console.error("Failed to fetch user:", response.status);
@@ -66,27 +66,8 @@ const OtherUserProfile = ({ user: propUser, loggedInUser, onUserUpdate }) => {
   );
 
   const isRequested = localUser.followRequests?.some(
-    (req) => {
-      const match = req?._id?.toString() === loggedInUser?._id?.toString();
-      console.log(`Checking request: req._id=${req?._id}, loggedInUser._id=${loggedInUser?._id}, match=${match}`);
-      return match;
-    }
+    (req) => req?._id?.toString() === loggedInUser?._id?.toString()
   );
-  console.log("isRequested:", isRequested);
-
-  useEffect(() => {
-    const handleModalTransition = () => {
-      const overlays = document.querySelectorAll('.modal-overlay');
-      overlays.forEach(overlay => {
-        if (showFollowersModal || showFollowingModal) {
-          overlay.classList.add('visible');
-        } else {
-          overlay.classList.remove('visible');
-        }
-      });
-    };
-    handleModalTransition();
-  }, [showFollowersModal, showFollowingModal]);
 
   const handleFollowRequest = async () => {
     try {
@@ -98,12 +79,7 @@ const OtherUserProfile = ({ user: propUser, loggedInUser, onUserUpdate }) => {
       const data = await response.json();
       if (response.ok) {
         alert("Follow request sent!");
-        const updatedResponse = await fetch(`${API_BASE_URL}/api/user/${localUser._id}`);
-        if (updatedResponse.ok) {
-          const updatedData = await updatedResponse.json();
-          console.log("Updated user data after follow request:", updatedData.user);
-          setLocalUser(updatedData.user);
-        }
+        setLocalUser(data.user);
       } else {
         alert("Error: " + data.error);
       }
@@ -130,6 +106,14 @@ const OtherUserProfile = ({ user: propUser, loggedInUser, onUserUpdate }) => {
     } catch (error) {
       console.error("Error following/unfollowing user:", error);
     }
+  };
+
+  const handlePostClick = (post) => {
+    setSelectedPost(post);
+  };
+
+  const handleClosePost = () => {
+    setSelectedPost(null);
   };
 
   if (loading) return <div>Loading user...</div>;
@@ -167,12 +151,7 @@ const OtherUserProfile = ({ user: propUser, loggedInUser, onUserUpdate }) => {
                 Unfollow
               </Button>
             ) : isRequested ? (
-              <Button
-                disabled
-                size="small"
-                variant="contained"
-                color="primary"
-              >
+              <Button disabled size="small" variant="contained" color="primary">
                 Requested
               </Button>
             ) : (
@@ -189,32 +168,36 @@ const OtherUserProfile = ({ user: propUser, loggedInUser, onUserUpdate }) => {
           </div>
         </div>
       </div>
-      
+
+      {/* Post Grid Using Post Component */}
       <div className="post-grid">
         {userPosts.map((post) => (
           <div className="post-item" key={post._id}>
-            <img src={post.imageUrl} alt="Post" className="post-image" />
+            <img
+              src={post.imageUrl}
+              alt="Post"
+              className="post-image"
+              onClick={() => handlePostClick(post)}
+              style={{ cursor: "pointer" }}
+            />
           </div>
         ))}
       </div>
-      
+
       {/* Followers Modal */}
       {showFollowersModal && (
         <div className="modal-overlay" onClick={() => setShowFollowersModal(false)}>
           <div className="list-container" onClick={(e) => e.stopPropagation()}>
             <div className="list-header">
               <h2>Followers</h2>
-              <IconButton
-                onClick={() => setShowFollowersModal(false)}
-                style={{ position: "absolute", top: 10, right: 10 }}
-              >
+              <IconButton onClick={() => setShowFollowersModal(false)}>
                 <CloseIcon />
               </IconButton>
             </div>
             <div className="list-content" ref={followersRef}>
-              {localUser.followers && localUser.followers.length > 0 ? (
-                localUser.followers.slice(0, 5).map((follower, index) => (
-                  <div key={follower._id} className="list-item" style={{ animationDelay: `${index * 0.1}s` }}>
+              {localUser.followers?.length > 0 ? (
+                localUser.followers.map((follower) => (
+                  <div key={follower._id} className="list-item">
                     <img src={follower.profileImage} alt={follower.username} />
                     <span>{follower.username}</span>
                   </div>
@@ -226,32 +209,15 @@ const OtherUserProfile = ({ user: propUser, loggedInUser, onUserUpdate }) => {
           </div>
         </div>
       )}
-      
-      {/* Following Modal */}
-      {showFollowingModal && (
-        <div className="modal-overlay" onClick={() => setShowFollowingModal(false)}>
-          <div className="list-container" onClick={(e) => e.stopPropagation()}>
-            <div className="list-header">
-              <h2>Following</h2>
-              <IconButton
-                onClick={() => setShowFollowingModal(false)}
-                style={{ position: "absolute", top: 10, right: 10 }}
-              >
-                <CloseIcon />
-              </IconButton>
-            </div>
-            <div className="list-content" ref={followingRef}>
-              {localUser.following && localUser.following.length > 0 ? (
-                localUser.following.slice(0, 5).map((followed, index) => (
-                  <div key={followed._id} className="list-item" style={{ animationDelay: `${index * 0.1}s` }}>
-                    <img src={followed.profileImage} alt={followed.username} />
-                    <span>{followed.username}</span>
-                  </div>
-                ))
-              ) : (
-                <p>No following</p>
-              )}
-            </div>
+
+      {/* Post Overlay */}
+      {selectedPost && (
+        <div className="modal-overlay" onClick={handleClosePost}>
+          <div className="post-overlay-container" onClick={(e) => e.stopPropagation()}>
+            <IconButton onClick={handleClosePost} style={{ position: "absolute", top: 10, right: 10 }}>
+              <CloseIcon />
+            </IconButton>
+            <Post post={selectedPost} loggedInUser={loggedInUser} showCommentsByDefault={true} />
           </div>
         </div>
       )}

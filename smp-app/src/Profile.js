@@ -4,12 +4,14 @@ import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
 import API_BASE_URL from './config';
+import Post from './Post';
 
 const Profile = ({ user, onUserUpdate, onEditClick }) => {
   const [localUser, setLocalUser] = useState(user || {});
   const [userPosts, setUserPosts] = useState([]);
   const [showFollowers, setShowFollowers] = useState(false);
   const [showFollowing, setShowFollowing] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
   const [loading, setLoading] = useState(false);
   const followersRef = useRef(null);
   const followingRef = useRef(null);
@@ -71,11 +73,19 @@ const Profile = ({ user, onUserUpdate, onEditClick }) => {
     setShowFollowing(true);
   };
 
+  const handlePostClick = (post) => {
+    setSelectedPost(post);
+  };
+
+  const handleClosePost = () => {
+    setSelectedPost(null);
+  };
+
   useEffect(() => {
     const handleModalTransition = () => {
       const overlays = document.querySelectorAll('.modal-overlay');
       overlays.forEach(overlay => {
-        if (showFollowers || showFollowing) {
+        if (showFollowers || showFollowing || selectedPost) {
           overlay.classList.add('visible');
         } else {
           overlay.classList.remove('visible');
@@ -83,7 +93,7 @@ const Profile = ({ user, onUserUpdate, onEditClick }) => {
       });
     };
     handleModalTransition();
-  }, [showFollowers, showFollowing]);
+  }, [showFollowers, showFollowing, selectedPost]);
 
   const handleDeletePost = async (postId) => {
     try {
@@ -100,6 +110,9 @@ const Profile = ({ user, onUserUpdate, onEditClick }) => {
       }
       await response.json();
       setUserPosts(userPosts.filter(post => post._id !== postId));
+      if (selectedPost && selectedPost._id === postId) {
+        setSelectedPost(null);
+      }
     } catch (error) {
       console.error("Error deleting post:", error);
     }
@@ -143,7 +156,13 @@ const Profile = ({ user, onUserUpdate, onEditClick }) => {
       <div className="post-grid">
         {userPosts.map((post) => (
           <div className="post-item" key={post._id}>
-            <img src={post.imageUrl} alt="Post" className="post-image" />
+            <img
+              src={post.imageUrl}
+              alt="Post"
+              className="post-image"
+              onClick={() => handlePostClick(post)}
+              style={{ cursor: "pointer" }}
+            />
             <IconButton
               onClick={() => handleDeletePost(post._id)}
               style={{ position: "absolute", top: 0, right: 0, background: "none", color: "white" }}
@@ -213,6 +232,25 @@ const Profile = ({ user, onUserUpdate, onEditClick }) => {
                 <p>Not following anyone yet.</p>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Post Overlay */}
+      {selectedPost && (
+        <div className="modal-overlay" onClick={handleClosePost}>
+          <div className="post-overlay-container" onClick={(e) => e.stopPropagation()}>
+            <IconButton
+              onClick={handleClosePost}
+              style={{ position: "absolute", top: 10, right: 10, zIndex: 1000, color: "white" }}
+            >
+              <CloseIcon />
+            </IconButton>
+            <Post
+              post={selectedPost}
+              loggedInUser={localUser}
+              showCommentsByDefault={true} // Show comments by default in profile
+            />
           </div>
         </div>
       )}

@@ -57,7 +57,11 @@ const ChatInterface = ({ loggedInUser }) => {
       }
       return { ...follower, messages: data.conversation.messages || [] };
     } catch (error) {
-      console.error("Error fetching conversation for follower", follower.id, error);
+      console.error(
+        "Error fetching conversation for follower",
+        follower.id,
+        error
+      );
       return { ...follower, messages: [] };
     }
   };
@@ -81,12 +85,15 @@ const ChatInterface = ({ loggedInUser }) => {
       return;
     }
     try {
-      const response = await fetch(`${API_BASE_URL}/api/user/${loggedInUser._id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/api/user/${loggedInUser._id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
       if (!response.ok) throw new Error("Failed to fetch user data");
       const data = await response.json();
       const followers = data.user.followers || [];
@@ -103,10 +110,11 @@ const ChatInterface = ({ loggedInUser }) => {
       setFilteredUsers(mappedFollowers);
 
       if (followersWithConversations.length > 0) {
-        const initialChat = recipientId
-          ? followersWithConversations.find((user) => user.id === recipientId) ||
-            followersWithConversations[0]
-          : followersWithConversations[0];
+        const initialChat =
+          recipientId &&
+          followersWithConversations.find((user) => user.id === recipientId)
+            ? followersWithConversations.find((user) => user.id === recipientId)
+            : followersWithConversations[0];
         setActiveChat(initialChat);
         fetchConversation(initialChat.id);
       }
@@ -166,7 +174,9 @@ const ChatInterface = ({ loggedInUser }) => {
     }
   };
 
-  const debouncedFilterUsers = useCallback(debounce(filterUsers, 300), [allFollowers]);
+  const debouncedFilterUsers = useCallback(debounce(filterUsers, 300), [
+    allFollowers,
+  ]);
 
   const handleSearchChange = (event) => {
     const query = event.target.value;
@@ -188,7 +198,8 @@ const ChatInterface = ({ loggedInUser }) => {
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // Send a message using the conversation endpoint
@@ -205,6 +216,7 @@ const ChatInterface = ({ loggedInUser }) => {
           senderId: loggedInUser._id,
           recipientId: activeChat.id,
           text: newMessage,
+          // Optional: add messageType if needed, e.g., messageType: "text"
         }),
       });
       if (response.ok) {
@@ -337,21 +349,30 @@ const ChatInterface = ({ loggedInUser }) => {
                   return (
                     <div
                       key={msg._id || index}
-                      className={`message-row ${isSent ? "sent-row" : "received-row"}`}
+                      className={`message-row ${
+                        isSent ? "sent-row" : "received-row"
+                      }`}
                     >
                       {isSent ? (
                         <>
-                          {/* Material UI IconButton with DeleteIcon on the left */}
                           <IconButton
                             onClick={() => deleteMessage(msg._id)}
                             size="small"
-                            color="grey"
+                            color="error"
                             style={{ marginRight: "5px" }}
                           >
                             <DeleteIcon fontSize="small" />
                           </IconButton>
                           <div className="sent">
-                            {msg.text}
+                            {msg.messageType === "image" ? (
+                              <img
+                                src={msg.imageUrl}
+                                alt="post preview"
+                                className="chat-image"
+                              />
+                            ) : (
+                              msg.text
+                            )}
                             <div className="message-time">
                               {formatRelativeTime(msg.createdAt)}
                             </div>
@@ -368,7 +389,15 @@ const ChatInterface = ({ loggedInUser }) => {
                             className="message-avatar"
                           />
                           <div className="received">
-                            {msg.text}
+                            {msg.messageType === "image" ? (
+                              <img
+                                src={msg.imageUrl}
+                                alt="post preview"
+                                className="chat-image"
+                              />
+                            ) : (
+                              msg.text
+                            )}
                             <div className="message-time">
                               {formatRelativeTime(msg.createdAt)}
                             </div>
