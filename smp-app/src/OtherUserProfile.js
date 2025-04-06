@@ -169,7 +169,6 @@ const OtherUserProfile = ({ user: propUser, loggedInUser, onUserUpdate }) => {
         </div>
       </div>
 
-      {/* Post Grid Using Post Component */}
       <div className="post-grid">
         {userPosts.map((post) => (
           <div className="post-item" key={post._id}>
@@ -186,7 +185,10 @@ const OtherUserProfile = ({ user: propUser, loggedInUser, onUserUpdate }) => {
 
       {/* Followers Modal */}
       {showFollowersModal && (
-        <div className="modal-overlay" onClick={() => setShowFollowersModal(false)}>
+        <div
+          className="modal-overlay visible"
+          onClick={() => setShowFollowersModal(false)}
+        >
           <div className="list-container" onClick={(e) => e.stopPropagation()}>
             <div className="list-header">
               <h2>Followers</h2>
@@ -210,14 +212,43 @@ const OtherUserProfile = ({ user: propUser, loggedInUser, onUserUpdate }) => {
         </div>
       )}
 
+      {/* Following Modal */}
+      {showFollowingModal && (
+        <div
+          className="modal-overlay visible"
+          onClick={() => setShowFollowingModal(false)}
+        >
+          <div className="list-container" onClick={(e) => e.stopPropagation()}>
+            <div className="list-header">
+              <h2>Following</h2>
+              <IconButton onClick={() => setShowFollowingModal(false)}>
+                <CloseIcon />
+              </IconButton>
+            </div>
+            <div className="list-content" ref={followingRef}>
+              {localUser.following?.length > 0 ? (
+                localUser.following.map((followed) => (
+                  <div key={followed._id} className="list-item">
+                    <img src={followed.profileImage} alt={followed.username} />
+                    <span>{followed.username}</span>
+                  </div>
+                ))
+              ) : (
+                <p>No following</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Post Overlay */}
       {selectedPost && (
-        <div className="modal-overlay" onClick={handleClosePost}>
-          <div className="post-overlay-container" onClick={(e) => e.stopPropagation()}>
-            <IconButton onClick={handleClosePost} style={{ position: "absolute", top: 10, right: 10 }}>
+        <div className="modal-overlay visible" onClick={handleClosePost}>
+          <div className="post-overlay" onClick={(e) => e.stopPropagation()}>
+            <img src={selectedPost.imageUrl} alt="Post" className="post-image-large" />
+            <IconButton className="close-btn" onClick={handleClosePost}>
               <CloseIcon />
             </IconButton>
-            <Post post={selectedPost} loggedInUser={loggedInUser} showCommentsByDefault={true} />
           </div>
         </div>
       )}
