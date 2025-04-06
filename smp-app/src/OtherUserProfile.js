@@ -237,7 +237,7 @@ const OtherUserProfile = ({ user: propUser, loggedInUser, onUserUpdate }) => {
 
       {/* ✅ Updated Post Overlay */}
       {selectedPost && (
-        <div className="modal-overlay" onClick={handleClosePost}>
+        <div className="modal-overlay visible" onClick={handleClosePost}>
           <div className="post-overlay-container" onClick={(e) => e.stopPropagation()}>
             <IconButton
               onClick={handleClosePost}
