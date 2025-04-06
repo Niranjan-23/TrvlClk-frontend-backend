@@ -64,6 +64,7 @@
 }
 
 .modal-overlay.visible {
+  display: flex; /* Make it visible */
   opacity: 1;
 }
 

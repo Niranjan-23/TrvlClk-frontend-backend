@@ -11,9 +11,11 @@
     "cra-template": "1.2.0",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.4.1",
+    "leaflet": "^1.9.4",
     "lucide-react": "^0.475.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.1.5",
     "react-scripts": "5.0.1",
     "socket.io-client": "^4.8.1",
@@ -45,6 +47,7 @@
     ]
   },
   "devDependencies": {
+    "@types/leaflet": "^1.9.17",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.5.1",
     "serve": "^14.2.4",
