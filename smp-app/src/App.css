@@ -158,3 +158,12 @@ body, html {
   /* Override to a dark gray tone so it doesn't appear pure white */
   background: #2a2a2a;
 }
+
+.map-container {
+  width: 100vw;
+  height: 100vh;
+  position: absolute; /* Allows the map to be fullscreen */
+  top: 0;
+  left: 0;
+  z-index: -1; /* Places it behind other content if needed */
+}

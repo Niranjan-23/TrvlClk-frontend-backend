@@ -17,6 +17,8 @@ import Brightness7Icon from "@mui/icons-material/Brightness7";
 import { Avatar } from "@mui/material";
 import API_BASE_URL from "./config";
 import MessageComponent from "./ChatInterface";
+import MapComponent from "./MapComponent";
+
 
 // Helper functions to retrieve data from localStorage
 const getLoggedInUserFromLocalStorage = () => {
@@ -265,6 +267,7 @@ const App = () => {
               <Route path="/ProfileSetting" element={<ProfileComp userId={loggedInUser._id} />} />
               {/* Updated route for viewing other users' profiles */}
               <Route path="/user/:userId" element={<OtherUserProfile loggedInUser={loggedInUser} />} />
+              <Route path="/map" element={<MapComponent />} />
               <Route path="*" element={<div>404 - Page Not Found</div>} />
             </Routes>
             {showEdit && (
