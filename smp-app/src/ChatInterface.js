@@ -5,6 +5,7 @@ import TextField from "@mui/material/TextField";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SearchIcon from "@mui/icons-material/Search";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import API_BASE_URL from "./config";
 import "./ChatInterface.css";
 
@@ -21,6 +22,7 @@ const ChatInterface = ({ loggedInUser }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showDeleteFor, setShowDeleteFor] = useState(null);
   const searchRef = useRef(null);
 
   // Helper to format timestamps relative to now
@@ -272,6 +274,11 @@ const ChatInterface = ({ loggedInUser }) => {
     }
   };
 
+  // Helper to check if a string is an image URL
+  const isImageUrl = (url) =>
+    typeof url === "string" &&
+    url.startsWith("https://images.pexels.com");
+
   useEffect(() => {
     fetchFollowers();
   }, [loggedInUser, recipientId]);
@@ -346,29 +353,66 @@ const ChatInterface = ({ loggedInUser }) => {
               {messages.length > 0 ? (
                 messages.map((msg, index) => {
                   const isSent = msg.sender === loggedInUser._id;
+                  const messageId = msg._id || index;
                   return (
                     <div
-                      key={msg._id || index}
-                      className={`message-row ${
-                        isSent ? "sent-row" : "received-row"
-                      }`}
+                      key={messageId}
+                      className={`message-row ${isSent ? "sent-row" : "received-row"}`}
+                      style={{ position: "relative" }}
                     >
                       {isSent ? (
                         <>
-                          <IconButton
-                            onClick={() => deleteMessage(msg._id)}
-                            size="small"
-                            color="error"
-                            style={{ marginRight: "5px" }}
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                          <div className="sent">
+                          <div className="sent" style={{ position: "relative" }}>
+                            {/* 3-dots icon for sent messages: left inside bubble */}
+                            <IconButton
+                              size="small"
+                              style={{
+                                position: "absolute",
+                                left: 8,
+                                top: 8,
+                                zIndex: 2,
+                              }}
+                              onClick={() =>
+                                setShowDeleteFor(showDeleteFor === messageId ? null : messageId)
+                              }
+                            >
+                              <MoreVertIcon fontSize="small" />
+                            </IconButton>
+                            {showDeleteFor === messageId && (
+                              <IconButton
+                                onClick={() => {
+                                  deleteMessage(msg._id);
+                                  setShowDeleteFor(null);
+                                }}
+                                size="small"
+                                color="error"
+                                style={{
+                                  position: "absolute",
+                                  left: 8,
+                                  top: 40,
+                                  background: "white",
+                                  zIndex: 10,
+                                }}
+                              >
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            )}
                             {msg.messageType === "image" ? (
                               <img
                                 src={msg.imageUrl}
                                 alt="post preview"
                                 className="chat-image"
+                              />
+                            ) : isImageUrl(msg.text) ? (
+                              <img
+                                src={msg.text}
+                                alt="sent"
+                                className="chat-image"
+                                style={{
+                                  maxWidth: 120,
+                                  maxHeight: 120,
+                                  borderRadius: 8,
+                                }}
                               />
                             ) : (
                               msg.text
@@ -388,12 +432,56 @@ const ChatInterface = ({ loggedInUser }) => {
                             src={activeChat.profileImage}
                             className="message-avatar"
                           />
-                          <div className="received">
+                          <div className="received" style={{ position: "relative" }}>
+                            <IconButton
+                              size="small"
+                              style={{
+                                position: "absolute",
+                                right: 8,
+                                top: 8,
+                                zIndex: 2,
+                              }}
+                              onClick={() =>
+                                setShowDeleteFor(showDeleteFor === messageId ? null : messageId)
+                              }
+                            >
+                              <MoreVertIcon fontSize="small" />
+                            </IconButton>
+                            {showDeleteFor === messageId && (
+                              <IconButton
+                                onClick={() => {
+                                  deleteMessage(msg._id);
+                                  setShowDeleteFor(null);
+                                }}
+                                size="small"
+                                color="error"
+                                style={{
+                                  position: "absolute",
+                                  right: 8,
+                                  top: 40,
+                                  background: "white",
+                                  zIndex: 10,
+                                }}
+                              >
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            )}
                             {msg.messageType === "image" ? (
                               <img
                                 src={msg.imageUrl}
                                 alt="post preview"
                                 className="chat-image"
+                              />
+                            ) : isImageUrl(msg.text) ? (
+                              <img
+                                src={msg.text}
+                                alt="sent"
+                                className="chat-image"
+                                style={{
+                                  maxWidth: 120,
+                                  maxHeight: 120,
+                                  borderRadius: 8,
+                                }}
                               />
                             ) : (
                               msg.text

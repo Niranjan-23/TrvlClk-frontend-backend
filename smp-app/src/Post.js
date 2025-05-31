@@ -105,7 +105,7 @@ const Post = ({ post, loggedInUser, showCommentsByDefault = false }) => {
         body: JSON.stringify({
           senderId: loggedInUser._id,
           recipientId: follower.id,
-          text: `Check out this post: ${post.imageUrl}`,
+          text: post.imageUrl,
         }),
       });
       if (!response.ok) {
