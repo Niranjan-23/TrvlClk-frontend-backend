@@ -7,6 +7,8 @@ const postSchema = new mongoose.Schema(
     imageUrl: { type: String, required: true },
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     location: { type: String, default: '' },
+    latitude: { type: Number },
+    longitude: { type: Number },
     description: { type: String, default: '' },
   },
   { timestamps: true }

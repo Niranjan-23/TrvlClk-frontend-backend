@@ -6,30 +6,60 @@ const mongoose = require('mongoose');
 
 exports.createPost = async (req, res) => {
   try {
-    const { userId, imageUrl, location, description } = req.body;
+    console.log('Received body:', req.body);
+    const { userId, imageUrl, location, description, latitude, longitude } = req.body;
+
     if (!imageUrl || typeof imageUrl !== 'string' || imageUrl.trim() === '') {
       return res.status(400).json({ error: 'A valid image URL is required' });
     }
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       return res.status(400).json({ error: 'Invalid user ID' });
     }
+
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ error: 'User not found' });
+    if (
+      latitude === undefined ||
+      longitude === undefined ||
+      latitude === null ||
+      longitude === null ||
+      isNaN(Number(latitude)) ||
+      isNaN(Number(longitude))
+    ) {
+      return res.status(400).json({ error: 'Latitude and longitude are required and must be numbers.' });
+    }
+    const lat = Number(latitude);
+    const lon = Number(longitude);
+
+    console.log('lat:', latitude, 'lon:', longitude, 'typeof lat:', typeof latitude, typeof longitude);
+
     const newPost = new Post({
       user: userId,
       imageUrl: imageUrl.trim(),
       likes: [],
       location: location ? location.trim() : '',
       description: description ? description.trim() : '',
+      latitude: !isNaN(lat) ? lat : undefined,
+      longitude: !isNaN(lon) ? lon : undefined,
     });
+
     await newPost.save();
     const populatedPost = await Post.findById(newPost._id)
-      .populate('user', 'username profileImage');
-    res.status(201).json({ post: populatedPost });
+  .populate('user', 'username profileImage')
+  .lean(); // ensures it's a plain object so we can manipulate/verify it
+
+if (populatedPost) {
+  populatedPost.latitude = newPost.latitude;
+  populatedPost.longitude = newPost.longitude;
+}
+
+res.status(201).json({ post: populatedPost });
+
   } catch (error) {
     handleDBError(res, error);
   }
 };
+
 
 exports.deletePost = async (req, res) => {
   try {

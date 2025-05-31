@@ -1,4 +1,3 @@
-// AddPost.js
 import React, { useState } from "react";
 import Button from "@mui/material/Button";
 import BackupTwoToneIcon from "@mui/icons-material/BackupTwoTone";
@@ -6,14 +5,17 @@ import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import TextField from '@mui/material/TextField';
 import "./AddPost.css";
 import API_BASE_URL from "./config";
+import Autocomplete from '@mui/material/Autocomplete';
 
 export default function AddPost({ user, onPostAdded = () => {} }) {
   const [previewUrl, setPreviewUrl] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
+  const [locationSuggestions, setLocationSuggestions] = useState([]);
+  const [latitude, setLatitude] = useState(null);
+  const [longitude, setLongitude] = useState(null);
 
-  // Prompt for an image URL
   const handleUploadClick = () => {
     const url = prompt("Enter Image URL:");
     if (url && url.trim() !== "") {
@@ -23,8 +25,16 @@ export default function AddPost({ user, onPostAdded = () => {} }) {
   };
 
   const handlePost = async () => {
+    console.log("Posting with:", { imageUrl, location, latitude, longitude });
+
     if (!imageUrl?.trim() || !user?._id) {
       console.error("Image URL is empty or user ID is missing");
+      return;
+    }
+
+    if (latitude === null || longitude === null) {
+      console.error("Please select a location from the dropdown suggestions.");
+      alert("Please select a location from the dropdown suggestions.");
       return;
     }
 
@@ -37,6 +47,8 @@ export default function AddPost({ user, onPostAdded = () => {} }) {
           imageUrl: imageUrl.trim(),
           location: location.trim(),
           description: description.trim(),
+          latitude,
+          longitude,
         }),
       });
 
@@ -49,16 +61,35 @@ export default function AddPost({ user, onPostAdded = () => {} }) {
       const data = await response.json();
       console.log("Post added successfully:", data.post);
 
-      // Trigger callback to refresh timeline
       onPostAdded();
 
-      // Clear fields
       setPreviewUrl("");
       setImageUrl("");
       setLocation("");
       setDescription("");
+      setLatitude(null);
+      setLongitude(null);
     } catch (error) {
       console.error("Error adding post:", error);
+    }
+  };
+
+  const fetchLocationSuggestions = async (query) => {
+    if (!query) return;
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=5&accept-language=en`
+      );
+      const data = await res.json();
+      setLocationSuggestions(
+        data.map((place) => ({
+          label: place.display_name,
+          lat: parseFloat(place.lat),
+          lon: parseFloat(place.lon),
+        }))
+      );
+    } catch (err) {
+      console.error("Failed to fetch location suggestions:", err);
     }
   };
 
@@ -76,13 +107,31 @@ export default function AddPost({ user, onPostAdded = () => {} }) {
               fullWidth
               margin="normal"
             />
-            <TextField
-              label="Location"
-              variant="outlined"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              fullWidth
-              margin="normal"
+            <Autocomplete
+              freeSolo
+              options={locationSuggestions}
+              onInputChange={(e, value) => {
+                setLocation(value);
+                fetchLocationSuggestions(value);
+              }}
+              onChange={(e, value) => {
+                if (typeof value === "string") {
+                  setLocation(value);
+                } else if (value) {
+                  setLocation(value.label);
+                  setLatitude(value.lat);
+                  setLongitude(value.lon);
+                }
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Location"
+                  variant="outlined"
+                  fullWidth
+                  margin="normal"
+                />
+              )}
             />
           </div>
           <div className="post-button">

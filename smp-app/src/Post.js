@@ -152,10 +152,20 @@ const Post = ({ post, loggedInUser, showCommentsByDefault = false }) => {
           <div className="post-info">
             {post.description && <p className="post-description">{post.description}</p>}
             {post.location && (
-              <p className="post-location">
+              <p
+                className="post-location"
+                onClick={() => navigate('/map', {
+                  state: {
+                    location: post.location, // Only pass the location string
+                  },
+                })}
+                style={{ cursor: "pointer", color: "#1976d2", textDecoration: "underline" }}
+              >
                 <LocationOnIcon fontSize="small" /> {post.location}
               </p>
             )}
+
+
           </div>
         </div>
       </div>
