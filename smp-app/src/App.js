@@ -9,7 +9,7 @@ import Search from "./Search";
 import Notification from "./Notification";
 import SignUp from "./SignUp";
 import Profile from "./Profile";
-import OtherUserProfile from "./OtherUserProfile"; // Import the other user's profile component
+import OtherUserProfile from "./OtherUserProfile";
 import EditProfileComponent from "./EditProfileComponent";
 import Button from "@mui/material/Button";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
@@ -18,7 +18,9 @@ import { Avatar } from "@mui/material";
 import API_BASE_URL from "./config";
 import MessageComponent from "./ChatInterface";
 import MapComponent from "./MapComponent";
-
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import Drawer from "@mui/material/Drawer";
+import IconButton from "@mui/material/IconButton";
 
 // Helper functions to retrieve data from localStorage
 const getLoggedInUserFromLocalStorage = () => {
@@ -39,15 +41,15 @@ const App = () => {
   const [loggedInUser, setLoggedInUser] = useState(getLoggedInUserFromLocalStorage());
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [showEdit, setShowEdit] = useState(false);
-  // Flag to ensure we fetch the full user data only once.
   const [fullUserFetched, setFullUserFetched] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 600);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const handleLogin = (token, user) => {
     setLoggedInUser(user);
     setIsLoggedIn(true);
     localStorage.setItem("token", token);
     localStorage.setItem("loggedInUser", JSON.stringify(user));
-    // Reset the flag so full data will be fetched after login.
     setFullUserFetched(false);
   };
 
@@ -80,7 +82,6 @@ const App = () => {
     setShowEdit(false);
   };
 
-  // Fetch the full user data (populated followers/following) if not yet fetched.
   useEffect(() => {
     const fetchFullUserData = async () => {
       if (loggedInUser && loggedInUser._id && !fullUserFetched) {
@@ -170,10 +171,9 @@ const App = () => {
     </div>
   );
 
-  // Profile component wrapper for logged-in user's own profile.
   const ProfileComp = ({ userId: propUserId }) => {
-    const { userId: paramUserId } = useParams(); // Get userId from URL params.
-    const userId = propUserId || paramUserId; // Use prop if provided, otherwise URL param.
+    const { userId: paramUserId } = useParams();
+    const userId = propUserId || paramUserId;
     const [profileUser, setProfileUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -231,6 +231,14 @@ const App = () => {
     );
   };
 
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 600);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
     <Router>
       {!isLoggedIn ? (
@@ -243,34 +251,88 @@ const App = () => {
         </div>
       ) : (
         <div className={isDarkMode ? "app-container dark" : "app-container light"}>
-          <Nav />
-          <div className="main-content">
-            <div className="toolbar">
-              <Button onClick={toggleTheme} variant="outlined" color="inherit">
-                {isDarkMode ? <Brightness7Icon /> : <Brightness4Icon />}
-              </Button>
-              <Button onClick={handleLogout} variant="outlined" color="inherit">
-                <Avatar
-                  alt={loggedInUser?.username || "User"}
-                  src={loggedInUser?.profileImage || "/default-avatar.png"}
-                  className="avatar"
+          {/* Desktop Nav */}
+          {!isMobile && <Nav />}
+          {/* Mobile Top Bar */}
+          {isMobile && (
+            <>
+              <div className="mobile-topbar">
+                <IconButton
+                  className="mobile-menu-btn"
+                  color="inherit"
+                  onClick={() => {
+                    setDrawerOpen(true);
+                    console.log("Drawer open:", true); // Add this line
+                  }}
+                  size="large"
+                  aria-label="menu"
+                >
+                  <MoreVertIcon fontSize="large" />
+                </IconButton>
+                <img
+                  src={require("./assets/logo.png")}
+                  alt="TrvlClk Logo"
+                  className="mobile-logo"
                 />
-                Logout
-              </Button>
-            </div>
+                <div className="mobile-actions">
+                  <IconButton onClick={toggleTheme} color="inherit" size="large">
+                    {isDarkMode ? <Brightness7Icon /> : <Brightness4Icon />}
+                  </IconButton>
+                  <IconButton onClick={handleLogout} color="inherit" size="large">
+                    <Avatar
+                      alt={loggedInUser?.username || "User"}
+                      src={loggedInUser?.profileImage || "/default-avatar.png"}
+                      className="avatar"
+                      sx={{ width: 32, height: 32 }}
+                    />
+                  </IconButton>
+                </div>
+              </div>
+              <Drawer
+                anchor="left"
+                open={drawerOpen}
+                onClose={() => setDrawerOpen(false)}
+                PaperProps={{ style: { width: 240 } }}
+              >
+                <Nav />
+              </Drawer>
+            </>
+          )}
+          <div className="main-content">
+            {/* Desktop toolbar */}
+            {!isMobile && (
+              <div className="toolbar">
+                <Button onClick={toggleTheme} variant="outlined" color="inherit">
+                  {isDarkMode ? <Brightness7Icon /> : <Brightness4Icon />}
+                </Button>
+                <Button onClick={handleLogout} variant="outlined" color="inherit">
+                  <Avatar
+                    alt={loggedInUser?.username || "User"}
+                    src={loggedInUser?.profileImage || "/default-avatar.png"}
+                    className="avatar"
+                  />
+                  Logout
+                </Button>
+              </div>
+            )}
             <Routes>
-              <Route path="/messages/:recipientId?" element={<MessageComponent loggedInUser={loggedInUser} />} />
-              <Route path="/" element={<Home />} />
-              <Route path="/Notification" element={<Noti />} />
-              <Route path="/Add-post" element={<NewPost />} />
-              <Route path="/Search" element={<SearchProfile />} />
-              <Route path="/ProfileSetting" element={<ProfileComp userId={loggedInUser._id} />} />
-              {/* Updated route for viewing other users' profiles */}
-              <Route path="/user/:userId" element={<OtherUserProfile loggedInUser={loggedInUser} />} />
-              <Route path="/map" element={<MapComponent />} />
-              <Route path="*" element={<div>404 - Page Not Found</div>} />
+              {isMobile ? (
+                <Route path="*" element={<Home />} />
+              ) : (
+                <>
+                  <Route path="/messages/:recipientId?" element={<MessageComponent loggedInUser={loggedInUser} />} />
+                  <Route path="/" element={<Home />} />
+                  <Route path="/Notification" element={<Noti />} />
+                  <Route path="/Add-post" element={<NewPost />} />
+                  <Route path="/Search" element={<SearchProfile />} />
+                  <Route path="/ProfileSetting" element={<ProfileComp userId={loggedInUser._id} />} />
+                  <Route path="/user/:userId" element={<OtherUserProfile loggedInUser={loggedInUser} />} />
+                  <Route path="/map" element={<MapComponent />} />
+                  <Route path="*" element={<div>404 - Page Not Found</div>} />
+                </>
+              )}
             </Routes>
-            {showEdit && (
+            {!isMobile && showEdit && (
               <EditProfileComponent
                 user={loggedInUser}
                 onClose={handleCloseEdit}

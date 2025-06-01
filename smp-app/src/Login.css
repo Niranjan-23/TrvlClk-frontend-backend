@@ -228,3 +228,12 @@
   color: #4500a0; /* Darker purple */
   transform: translateX(2px); /* Subtle shift */
 }
+
+/* Media query for mobile view */
+@media (max-width: 600px) {
+  .login-box {
+    width: 80%; /* Reduce the width of the login box */
+    padding: 20px; /* Reduce padding for smaller screens */
+    margin-top: 10px; /* Adjust margin if needed */
+  }
+}

@@ -47,6 +47,22 @@
   background: linear-gradient(180deg, #0a0a0a 0%, #202020 100%);
 }
 
+/* Mobile view dark theme styles for Nav */
+@media (max-width: 600px) {
+  .app-container.dark .nav-container {
+    background-color: #333; /* Dark background */
+    color: #fff; /* Light text */
+  }
+}
+
+/* Mobile view light theme styles for Nav */
+@media (max-width: 600px) {
+  .app-container.light .nav-container {
+    background-color: #f9f9f9 !important; /* Light background */
+    color: #333 !important; /* Dark text */
+  }
+}
+
 /* Sidebar Title (for logo) */
 .nav-title {
   display: flex;
