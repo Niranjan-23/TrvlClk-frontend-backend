@@ -8,6 +8,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import API_BASE_URL from "./config";
 import "./ChatInterface.css";
+import Post from "./Post"; // Import the Post component
 
 const ChatInterface = ({ loggedInUser }) => {
   const { recipientId } = useParams();
@@ -23,6 +24,7 @@ const ChatInterface = ({ loggedInUser }) => {
   const [error, setError] = useState(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const [showDeleteFor, setShowDeleteFor] = useState(null);
+  const [selectedPost, setSelectedPost] = useState(null); // State for selected post
   const searchRef = useRef(null);
 
   // Helper to format timestamps relative to now
@@ -193,6 +195,75 @@ const ChatInterface = ({ loggedInUser }) => {
     setShowDropdown(false);
   };
 
+  const handlePostClick = async (messageData) => {
+    console.log('Message clicked:', messageData);
+    
+    // Check if the message has direct post data
+    if (messageData.post && messageData.post._id) {
+      console.log('Using embedded post data:', messageData.post);
+      setSelectedPost(messageData.post);
+      return;
+    }
+    
+    // If no direct post data, try to get post ID from the message
+    const postId = messageData.postId || messageData._id;
+    if (!postId) {
+      console.log('No post ID available');
+      return;
+    }
+
+    // Fetch the post data
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/posts/${postId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch post data');
+      }
+      const data = await response.json();
+      console.log('Fetched post data:', data);
+      setSelectedPost(data);
+    } catch (error) {
+      console.error('Error fetching post:', error);
+    }
+  };
+
+  // Add this new function to fetch post data
+  const fetchPostData = async (postId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/posts/${postId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch post data');
+      }
+      const data = await response.json();
+      console.log('Fetched post data:', data);
+      setSelectedPost(data.post);
+    } catch (error) {
+      console.error('Error fetching post:', error);
+    }
+  };
+
+  const handleClosePost = () => {
+    setSelectedPost(null);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (selectedPost && !event.target.closest('.post-preview')) {
+        handleClosePost();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [selectedPost]);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
@@ -278,6 +349,48 @@ const ChatInterface = ({ loggedInUser }) => {
   const isImageUrl = (url) =>
     typeof url === "string" &&
     url.startsWith("https://images.pexels.com");
+
+  // New function to send image messages
+  const sendImageMessage = async (imageUrl, postData) => {
+    try {
+      // Ensure postData has all required fields
+      const messageData = {
+        senderId: loggedInUser._id,
+        recipientId: activeChat.id,
+        text: imageUrl,
+        messageType: "image",
+        imageUrl: imageUrl,
+        post: {
+          _id: postData._id,
+          imageUrl: postData.imageUrl,
+          description: postData.description,
+          location: postData.location,
+          user: postData.user,
+          likes: postData.likes,
+          // Add any other necessary post fields
+        }
+      };
+
+      const response = await fetch(`${API_BASE_URL}/api/conversations`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(messageData),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to send image message');
+      }
+      
+      const data = await response.json();
+      console.log('Message sent with post data:', data);
+      setMessages(data.conversation.messages);
+    } catch (error) {
+      console.error("Error sending image message:", error);
+    }
+  };
 
   useEffect(() => {
     fetchFollowers();
@@ -402,16 +515,30 @@ const ChatInterface = ({ loggedInUser }) => {
                                 src={msg.imageUrl}
                                 alt="post preview"
                                 className="chat-image"
+                                onClick={() => {
+                                  console.log('Image clicked, post data:', msg.post);
+                                  if (msg.post && msg.post._id) {
+                                    handlePostClick(msg.post);
+                                  }
+                                }}
+                                style={{ cursor: 'pointer' }}
                               />
                             ) : isImageUrl(msg.text) ? (
                               <img
                                 src={msg.text}
                                 alt="sent"
                                 className="chat-image"
+                                onClick={() => {
+                                  console.log('Image clicked, post data:', msg.post);
+                                  if (msg.post && msg.post._id) {
+                                    handlePostClick(msg.post);
+                                  }
+                                }}
                                 style={{
                                   maxWidth: 120,
                                   maxHeight: 120,
                                   borderRadius: 8,
+                                  cursor: 'pointer'
                                 }}
                               />
                             ) : (
@@ -471,16 +598,30 @@ const ChatInterface = ({ loggedInUser }) => {
                                 src={msg.imageUrl}
                                 alt="post preview"
                                 className="chat-image"
+                                onClick={() => {
+                                  console.log('Image clicked, post data:', msg.post);
+                                  if (msg.post && msg.post._id) {
+                                    handlePostClick(msg.post);
+                                  }
+                                }}
+                                style={{ cursor: 'pointer' }}
                               />
                             ) : isImageUrl(msg.text) ? (
                               <img
                                 src={msg.text}
                                 alt="sent"
                                 className="chat-image"
+                                onClick={() => {
+                                  console.log('Image clicked, post data:', msg.post);
+                                  if (msg.post && msg.post._id) {
+                                    handlePostClick(msg.post);
+                                  }
+                                }}
                                 style={{
                                   maxWidth: 120,
                                   maxHeight: 120,
                                   borderRadius: 8,
+                                  cursor: 'pointer'
                                 }}
                               />
                             ) : (
@@ -516,6 +657,16 @@ const ChatInterface = ({ loggedInUser }) => {
           </div>
         )}
       </div>
+
+      {/* Add Post Preview Modal */}
+      {selectedPost && (
+        <div className="post-preview-overlay">
+          <div className="post-preview">
+            <button className="close-button" onClick={handleClosePost}>&times;</button>
+            <Post post={selectedPost} loggedInUser={loggedInUser} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

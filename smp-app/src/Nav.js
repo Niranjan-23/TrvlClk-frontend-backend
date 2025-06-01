@@ -13,7 +13,7 @@ import API_BASE_URL from "./config";
 import "./Nav.css";
 import logo from "./assets/logo.png";
 
-const Nav = () => {
+const Nav = ({ onLinkClick }) => {
   const currentUser = JSON.parse(localStorage.getItem("loggedInUser") || "null");
   const [notificationCount, setNotificationCount] = useState(0);
 
@@ -48,13 +48,13 @@ const Nav = () => {
         <img src={logo} alt="TrvlClk Logo" className="logo-image" />
       </Link>
       <div className="nav-links">
-        <Link to="/" className="nav-link">
+        <Link to="/" className="nav-link" onClick={onLinkClick}>
           <Button className="nav-button" color="success" variant="text">
             <HomeRoundedIcon fontSize="large" />
             Home
           </Button>
         </Link>
-        <Link to="/Notification" className="nav-link">
+        <Link to="/Notification" className="nav-link" onClick={onLinkClick}>
           <Button color="success" className="nav-button" variant="text">
             <Badge badgeContent={notificationCount} color="error">
               <NotificationsActiveTwoToneIcon fontSize="large" />
@@ -62,32 +62,32 @@ const Nav = () => {
             Notification
           </Button>
         </Link>
-        <Link to="/messages" className="nav-link">
+        <Link to="/messages" className="nav-link" onClick={onLinkClick}>
           <Button color="success" className="nav-button" variant="text">
             <ChatBubbleOutlineIcon fontSize="large" />
             Messages
           </Button>
         </Link>
-        <Link to="/Add-post" className="nav-link">
+        <Link to="/Add-post" className="nav-link" onClick={onLinkClick}>
           <Button color="success" className="nav-button" variant="text">
             <AddBoxOutlinedIcon fontSize="large" />
             Add Post
           </Button>
         </Link>
-        <Link to="/Search" className="nav-link">
+        <Link to="/Search" className="nav-link" onClick={onLinkClick}>
           <Button color="success" className="nav-button" variant="text">
             <PersonSearchTwoToneIcon fontSize="large" />
             Search
           </Button>
         </Link>
-        <Link to="/ProfileSetting" className="nav-link">
+        <Link to="/ProfileSetting" className="nav-link" onClick={onLinkClick}>
           <Button color="success" className="nav-button" variant="text">
             <AccountCircleTwoToneIcon fontSize="large" />
             Profile
           </Button>
         </Link>
         {/* Map Button Added */}
-        <Link to="/map" className="nav-link">
+        <Link to="/map" className="nav-link" onClick={onLinkClick}>
           <Button color="success" className="nav-button" variant="text">
             <RoomOutlinedIcon fontSize="large" />
             Map

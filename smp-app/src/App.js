@@ -294,8 +294,19 @@ const App = () => {
                 onClose={() => setDrawerOpen(false)}
                 PaperProps={{ style: { width: 240 } }}
               >
-                <Nav />
+                <Nav onLinkClick={() => setDrawerOpen(false)} />
               </Drawer>
+              <Routes>
+                <Route path="/messages/:recipientId?" element={<MessageComponent loggedInUser={loggedInUser} />} />
+                <Route path="/" element={<Home />} />
+                <Route path="/Notification" element={<Noti />} />
+                <Route path="/Add-post" element={<NewPost />} />
+                <Route path="/Search" element={<SearchProfile />} />
+                <Route path="/ProfileSetting" element={<ProfileComp userId={loggedInUser._id} />} />
+                <Route path="/user/:userId" element={<OtherUserProfile loggedInUser={loggedInUser} />} />
+                <Route path="/map" element={<MapComponent />} />
+                <Route path="*" element={<div>404 - Page Not Found</div>} />
+              </Routes>
             </>
           )}
           <div className="main-content">

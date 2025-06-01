@@ -237,3 +237,48 @@ body, html {
   align-items: center;
   gap: 8px; /* Adjust the spacing between the icons */
 }
+
+.post-preview-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.post-preview {
+  background-color: var(--background-color);
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: inherit;
+}
+
+/* Dark theme support */
+.app-container.dark .post-preview {
+  background-color: #333;
+  color: #fff;
+}
+
+.app-container.light .post-preview {
+  background-color: #fff;
+  color: #333;
+}

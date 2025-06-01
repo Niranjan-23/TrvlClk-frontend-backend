@@ -106,12 +106,24 @@ const Post = ({ post, loggedInUser, showCommentsByDefault = false }) => {
           senderId: loggedInUser._id,
           recipientId: follower.id,
           text: post.imageUrl,
+          messageType: "image",
+          post: {
+            _id: post._id,
+            imageUrl: post.imageUrl,
+            description: post.description,
+            location: post.location,
+            user: post.user,
+            likes: post.likes
+          }
         }),
       });
+
       if (!response.ok) {
         console.error('Failed to send post preview');
         return;
       }
+      
+      console.log('Post sent successfully');
       setOpenSendDialog(false);
     } catch (error) {
       console.error("Error sending post preview:", error);
