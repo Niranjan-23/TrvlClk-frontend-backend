@@ -197,54 +197,54 @@ const ChatInterface = ({ loggedInUser }) => {
   };
 
   const handlePostClick = async (msg) => {
-    console.log('Message clicked:', msg);
-    
-    if (msg.post) {
-      console.log('Found post in message:', msg.post);
-      setSelectedPost({
-        ...msg.post,
-        user: msg.post.user || {
-          _id: msg.sender,
-          username: activeChat.name,
-          profileImage: activeChat.profileImage
-        }
-      });
-      return;
-    }
-    
-    if (msg.messageType === "image" || (msg.text && isImageUrl(msg.text))) {
-      try {
-        const postId = msg.postId;
-        if (postId) {
-          const response = await fetch(`${API_BASE_URL}/api/posts/${postId}`, {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          });
-          
-          if (response.ok) {
-            const data = await response.json();
-            setSelectedPost(data.post);
-            return;
-          }
-        }
-        
-        // If no post data, create a preview post object
+    try {
+      // If the message contains a complete post object
+      if (msg.post) {
         setSelectedPost({
-          _id: msg._id,
-          imageUrl: msg.imageUrl || msg.text,
-          user: {
+          ...msg.post,
+          user: msg.post.user || {
             _id: msg.sender,
-            username: msg.sender === loggedInUser._id ? loggedInUser.username : activeChat.name,
-            profileImage: msg.sender === loggedInUser._id ? loggedInUser.profileImage : activeChat.profileImage
+            username: activeChat?.name,
+            profileImage: activeChat?.profileImage
           },
-          likes: [],
-          description: "",
-          createdAt: msg.createdAt
+          likes: msg.post.likes || [],
+          comments: msg.post.comments || []
         });
-      } catch (error) {
-        console.error('Error fetching post:', error);
+        return;
       }
+
+      // If the message contains a postId, fetch the complete post
+      if (msg.postId) {
+        const response = await fetch(`${API_BASE_URL}/api/posts/${msg.postId}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setSelectedPost(data.post);
+          return;
+        }
+      }
+
+      // Fallback for simple image messages
+      setSelectedPost({
+        _id: msg._id || Date.now().toString(),
+        imageUrl: msg.imageUrl || msg.text,
+        user: {
+          _id: msg.sender,
+          username: msg.sender === loggedInUser._id ? loggedInUser.username : activeChat?.name,
+          profileImage: msg.sender === loggedInUser._id ? loggedInUser.profileImage : activeChat?.profileImage
+        },
+        likes: [],
+        comments: [],
+        description: msg.description || "",
+        createdAt: msg.createdAt || new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Error handling post click:', error);
     }
   };
 
@@ -405,6 +405,12 @@ const ChatInterface = ({ loggedInUser }) => {
     fetchFollowers();
   }, [loggedInUser, recipientId]);
 
+  useEffect(() => {
+    return () => {
+      setSelectedPost(null); // Cleanup on unmount
+    };
+  }, []);
+
   if (loading) return <div>Loading chats...</div>;
   if (error) return <div className="error">{error}</div>;
 
@@ -519,35 +525,27 @@ const ChatInterface = ({ loggedInUser }) => {
                                 <DeleteIcon fontSize="small" />
                               </IconButton>
                             )}
-                            {msg.messageType === "image" ? (
-                              <img
-                                src={msg.imageUrl}
-                                alt="post preview"
-                                className="chat-image"
-                                onClick={() => {
-                                  console.log('Image clicked, message:', msg); // Log the full message
-                                  handlePostClick(msg); // Pass the entire message object
-                                }}
-                                style={{ cursor: 'pointer' }}
-                              />
-                            ) : isImageUrl(msg.text) ? (
-                              <img
-                                src={msg.text}
-                                alt="sent"
-                                className="chat-image"
-                                onClick={() => {
-                                  console.log('Image clicked, message:', msg); // Log the full message
-                                  handlePostClick(msg); // Pass the entire message object
-                                }}
-                                style={{
-                                  maxWidth: 120,
-                                  maxHeight: 120,
-                                  borderRadius: 8,
-                                  cursor: 'pointer'
-                                }}
-                              />
+                            {msg.messageType === "image" || isImageUrl(msg.text) ? (
+                              <div className="image-container" onClick={() => handlePostClick(msg)}>
+                                <img
+                                  src={msg.imageUrl || msg.text}
+                                  alt="shared content"
+                                  className="chat-image"
+                                  style={{
+                                    maxWidth: 120,
+                                    maxHeight: 120,
+                                    borderRadius: 8,
+                                    cursor: 'pointer'
+                                  }}
+                                />
+                                {msg.post && (
+                                  <div className="image-overlay">
+                                    <span>View Post</span>
+                                  </div>
+                                )}
+                              </div>
                             ) : (
-                              msg.text
+                              <span>{msg.text}</span>
                             )}
                             <div className="message-time">
                               {formatRelativeTime(msg.createdAt)}
@@ -598,35 +596,27 @@ const ChatInterface = ({ loggedInUser }) => {
                                 <DeleteIcon fontSize="small" />
                               </IconButton>
                             )}
-                            {msg.messageType === "image" ? (
-                              <img
-                                src={msg.imageUrl}
-                                alt="post preview"
-                                className="chat-image"
-                                onClick={() => {
-                                  console.log('Image clicked, message:', msg); // Log the full message
-                                  handlePostClick(msg); // Pass the entire message object
-                                }}
-                                style={{ cursor: 'pointer' }}
-                              />
-                            ) : isImageUrl(msg.text) ? (
-                              <img
-                                src={msg.text}
-                                alt="sent"
-                                className="chat-image"
-                                onClick={() => {
-                                  console.log('Image clicked, message:', msg); // Log the full message
-                                  handlePostClick(msg); // Pass the entire message object
-                                }}
-                                style={{
-                                  maxWidth: 120,
-                                  maxHeight: 120,
-                                  borderRadius: 8,
-                                  cursor: 'pointer'
-                                }}
-                              />
+                            {msg.messageType === "image" || isImageUrl(msg.text) ? (
+                              <div className="image-container" onClick={() => handlePostClick(msg)}>
+                                <img
+                                  src={msg.imageUrl || msg.text}
+                                  alt="shared content"
+                                  className="chat-image"
+                                  style={{
+                                    maxWidth: 120,
+                                    maxHeight: 120,
+                                    borderRadius: 8,
+                                    cursor: 'pointer'
+                                  }}
+                                />
+                                {msg.post && (
+                                  <div className="image-overlay">
+                                    <span>View Post</span>
+                                  </div>
+                                )}
+                              </div>
                             ) : (
-                              msg.text
+                              <span>{msg.text}</span>
                             )}
                             <div className="message-time">
                               {formatRelativeTime(msg.createdAt)}
@@ -659,25 +649,37 @@ const ChatInterface = ({ loggedInUser }) => {
         )}
       </div>
 
-      {/* Add Post Preview Modal */}
+      {/* Post Preview Modal */}
       {selectedPost && (
-        <div className="modal-overlay visible" onClick={handleClosePost}>
-          <div className="post-overlay-container" onClick={(e) => e.stopPropagation()}>
-            <IconButton
-              onClick={handleClosePost}
-              style={{ position: "absolute", top: 10, right: 10, zIndex: 1000, color: "white" }}
-            >
-              <CloseIcon />
-            </IconButton>
+        <div 
+          className="modal-overlay" 
+          onClick={handleClosePost}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1000
+          }}
+        >
+          <div 
+            className="post-preview"
+            onClick={e => e.stopPropagation()}
+            style={{
+              padding: '20px',
+              borderRadius: '8px',
+              maxWidth: '90%',
+              maxHeight: '90vh',
+              overflow: 'auto'
+            }}
+          >
             <Post
-              post={{
-                ...selectedPost,
-                user: selectedPost.user || {
-                  _id: loggedInUser._id,
-                  username: loggedInUser.username,
-                  profileImage: loggedInUser.profileImage
-                }
-              }}
+              post={selectedPost}
               loggedInUser={loggedInUser}
               showCommentsByDefault={false}
             />

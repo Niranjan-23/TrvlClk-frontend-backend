@@ -280,7 +280,8 @@
 
 /* Chat Image Styling */
 .chat-image {
-  max-width: 150px;
+  max-width: 120px;
+  max-height: 120px;
   border-radius: 8px;
   cursor: pointer;
   transition: transform 0.2s;
@@ -502,17 +503,13 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  backdrop-filter: blur(10px);
-  background: rgba(0, 0, 0, 0.5);
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  will-change: opacity;
 }
 
 .modal-overlay.visible {
@@ -582,9 +579,7 @@
 }
 
 /* Dark Mode Support */
-.app-container.dark .post-overlay-container {
-  background-color: #222;
-}
+
 
 .app-container.dark .comment-area {
   background: rgba(51, 51, 51, 0.9);

@@ -274,11 +274,13 @@ body, html {
 
 /* Dark theme support */
 .app-container.dark .post-preview {
-  background-color: #333;
   color: #fff;
 }
 
 .app-container.light .post-preview {
   background-color: #fff;
   color: #333;
+}
+.post-preview::-webkit-scrollbar {
+  display: none;
 }
