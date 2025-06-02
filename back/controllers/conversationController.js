@@ -22,17 +22,13 @@ exports.getConversation = async (req, res) => {
 
 exports.sendMessage = async (req, res) => {
   try {
-    const { senderId, recipientId, text } = req.body;
-    if (!senderId || !recipientId || !text) {
-      return res.status(400).json({ error: 'Missing required fields' });
-    }
+    const { senderId, recipientId, text, messageType, imageUrl, post } = req.body;
 
-    // Find an existing conversation between these two users
+    // Find or create conversation
     let conversation = await Conversation.findOne({
       participants: { $all: [senderId, recipientId] }
     });
 
-    // If it doesn't exist, create a new conversation
     if (!conversation) {
       conversation = new Conversation({
         participants: [senderId, recipientId],
@@ -40,13 +36,37 @@ exports.sendMessage = async (req, res) => {
       });
     }
 
-    // Add the new message to the conversation
-    conversation.messages.push({ sender: senderId, text });
+    // Create new message
+    const newMessage = {
+      sender: senderId,
+      text,
+      messageType: messageType || 'text',
+      imageUrl,
+      post: post ? {
+        _id: post._id,
+        imageUrl: post.imageUrl,
+        description: post.description,
+        location: post.location,
+        user: post.user,
+        likes: post.likes
+      } : undefined
+    };
+
+    conversation.messages.push(newMessage);
     await conversation.save();
-    res.status(201).json({ conversation });
+
+    res.status(200).json({ 
+      conversation: {
+        ...conversation.toObject(),
+        messages: conversation.messages.map(msg => ({
+          ...msg.toObject(),
+          post: msg.post // Ensure post data is included
+        }))
+      }
+    });
   } catch (error) {
-    console.error('Error sending message:', error);
-    res.status(500).json({ error: 'Error sending message' });
+    console.error('Error in conversation controller:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 

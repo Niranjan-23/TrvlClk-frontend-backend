@@ -495,3 +495,117 @@
 .delete-btn:hover {
   text-decoration: underline;
 }
+
+/* Post Preview Modal */
+/* Post Preview Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  will-change: opacity;
+}
+
+.modal-overlay.visible {
+  opacity: 1;
+}
+
+.post-overlay-container {
+  padding: 0;
+  width: 90%;
+  max-width: 800px;
+  position: relative;
+  animation: modalFadeIn 0.3s ease-out;
+  z-index: 1001;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  transition: max-height 0.3s ease;
+}
+
+/* Ensure post wrapper fits within container */
+.post-overlay-container .post-wrapper {
+  width: 100%;
+  max-width: 100%;
+  flex-shrink: 0;
+}
+
+/* When comments are shown */
+.post-overlay-container:has(.comment-area) {
+  max-height: 90vh;
+  justify-content: flex-start;
+  padding-bottom: 15px;
+}
+
+/* Adjust comment area in overlay */
+.post-overlay-container .comment-area {
+  background: rgba(255, 255, 255, 0.9);
+  padding-top: 20px;
+  border-radius: 0 0 10px 10px;
+  width: 100%;
+  padding: 10px;
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+/* Close button styling */
+.post-overlay-container .MuiIconButton-root {
+  position: absolute;
+  top: -110px;
+  right: -100px;
+  color: white;
+  z-index: 1002;
+  background: none;
+  padding: 8px;
+}
+
+/* Modal Fade and Scale Animation */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Dark Mode Support */
+.app-container.dark .post-overlay-container {
+  background-color: #222;
+}
+
+.app-container.dark .comment-area {
+  background: rgba(51, 51, 51, 0.9);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .post-overlay-container {
+    max-width: 90%;
+    max-height: 80vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .post-overlay-container {
+    max-width: 95%;
+    max-height: 75vh;
+  }
+
+  .post-overlay-container .post-wrapper,
+  .post-overlay-container .comment-area {
+    max-width: 100%;
+  }
+}
