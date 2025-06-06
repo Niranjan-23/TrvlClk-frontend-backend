@@ -304,7 +304,7 @@ const App = () => {
                 <Route path="/Search" element={<SearchProfile />} />
                 <Route path="/ProfileSetting" element={<ProfileComp userId={loggedInUser._id} />} />
                 <Route path="/user/:userId" element={<OtherUserProfile loggedInUser={loggedInUser} />} />
-                <Route path="/map" element={<MapComponent />} />
+                <Route path="/map" element={<MapComponent loggedInUser={loggedInUser} />} />
                 <Route path="*" element={<div>404 - Page Not Found</div>} />
               </Routes>
             </>
@@ -338,7 +338,7 @@ const App = () => {
                   <Route path="/Search" element={<SearchProfile />} />
                   <Route path="/ProfileSetting" element={<ProfileComp userId={loggedInUser._id} />} />
                   <Route path="/user/:userId" element={<OtherUserProfile loggedInUser={loggedInUser} />} />
-                  <Route path="/map" element={<MapComponent />} />
+                  <Route path="/map" element={<MapComponent loggedInUser={loggedInUser} />} />
                   <Route path="*" element={<div>404 - Page Not Found</div>} />
                 </>
               )}

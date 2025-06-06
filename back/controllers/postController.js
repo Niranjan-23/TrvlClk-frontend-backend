@@ -138,3 +138,24 @@ exports.likePost = async (req, res) => {
     handleDBError(res, error);
   }
 };
+
+// postController.js
+exports.getPostsByLocation = async (req, res) => {
+  try {
+    const { location } = req.params;
+    if (!location || typeof location !== "string" || location.trim() === "") {
+      return res.status(400).json({ error: "A valid location string is required" });
+    }
+
+    // Case-insensitive search for posts by location
+    const posts = await Post.find({
+      location: { $regex: location, $options: "i" }, // Case-insensitive regex match
+    })
+      .populate("user", "username profileImage")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({ posts });
+  } catch (error) {
+    handleDBError(res, error);
+  }
+};

@@ -29,6 +29,7 @@ export default function AddPost({ user, onPostAdded = () => {} }) {
 
     if (!imageUrl?.trim() || !user?._id) {
       console.error("Image URL is empty or user ID is missing");
+      alert("Please provide a valid image URL and ensure you are logged in.");
       return;
     }
 
@@ -55,13 +56,14 @@ export default function AddPost({ user, onPostAdded = () => {} }) {
       if (!response.ok) {
         const errorData = await response.json();
         console.error("Error adding post:", errorData.error || "Unknown error");
+        alert(`Error: ${errorData.error || "Failed to add post"}`);
         return;
       }
 
       const data = await response.json();
       console.log("Post added successfully:", data.post);
 
-      onPostAdded();
+      onPostAdded(data.post); // Pass the new post to the callback
 
       setPreviewUrl("");
       setImageUrl("");
@@ -69,13 +71,18 @@ export default function AddPost({ user, onPostAdded = () => {} }) {
       setDescription("");
       setLatitude(null);
       setLongitude(null);
+      setLocationSuggestions([]); // Reset suggestions
     } catch (error) {
       console.error("Error adding post:", error);
+      alert("Failed to add post. Please try again.");
     }
   };
 
   const fetchLocationSuggestions = async (query) => {
-    if (!query) return;
+    if (!query) {
+      setLocationSuggestions([]);
+      return;
+    }
     try {
       const res = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=5&accept-language=en`
@@ -90,6 +97,7 @@ export default function AddPost({ user, onPostAdded = () => {} }) {
       );
     } catch (err) {
       console.error("Failed to fetch location suggestions:", err);
+      setLocationSuggestions([]);
     }
   };
 
@@ -117,6 +125,8 @@ export default function AddPost({ user, onPostAdded = () => {} }) {
               onChange={(e, value) => {
                 if (typeof value === "string") {
                   setLocation(value);
+                  setLatitude(null);
+                  setLongitude(null);
                 } else if (value) {
                   setLocation(value.label);
                   setLatitude(value.lat);
@@ -178,7 +188,7 @@ export default function AddPost({ user, onPostAdded = () => {} }) {
           </div>
         </>
       ) : (
-        <div style={{ gap:"30px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%" }}>
+        <div style={{ gap: "30px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%" }}>
           <h3>No Image Uploaded</h3>
           <Button
             type="button"

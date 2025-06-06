@@ -10,6 +10,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import API_BASE_URL from "./config";
 import "./ChatInterface.css";
 import Post from "./Post"; // Import the Post component
+import Picker from "@emoji-mart/react";
 
 const ChatInterface = ({ loggedInUser }) => {
   const { recipientId } = useParams();
@@ -26,6 +27,8 @@ const ChatInterface = ({ loggedInUser }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showDeleteFor, setShowDeleteFor] = useState(null);
   const [selectedPost, setSelectedPost] = useState(null); // State for selected post
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [replyTo, setReplyTo] = useState(null);
   const searchRef = useRef(null);
 
   // Helper to format timestamps relative to now
@@ -274,51 +277,64 @@ const ChatInterface = ({ loggedInUser }) => {
       document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Send a message using the conversation endpoint
   const sendMessage = async () => {
-    if (newMessage.trim() === "" || !activeChat) return;
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/conversations`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          senderId: loggedInUser._id,
-          recipientId: activeChat.id,
-          text: newMessage,
-          // Optional: add messageType if needed, e.g., messageType: "text"
-        }),
-      });
-      if (response.ok) {
-        const data = await response.json();
-        if (data.conversation && data.conversation._id) {
-          setConversationId(data.conversation._id);
-        }
-        setMessages(data.conversation.messages);
-        setNewMessage("");
-        if (!chatUsers.find((user) => user.id === activeChat.id)) {
-          const updatedUser = await fetchConversationForFollower(activeChat);
-          if (updatedUser.messages.length > 0) {
-            setChatUsers((prev) => [...prev, updatedUser]);
-          }
-        }
-      } else {
-        console.error("Failed to send message:", response.status);
+  if (!newMessage.trim() || !activeChat) return;
+  try {
+    const payload = {
+      senderId: loggedInUser._id,
+      recipientId: activeChat.id,
+      text: newMessage,
+      replyTo: replyTo ? {
+        _id: replyTo._id,
+        sender: replyTo.sender,
+        text: replyTo.text,
+        messageType: replyTo.messageType || 'text',
+        imageUrl: replyTo.imageUrl
+      } : null,
+      messageType: 'text'
+    };
+
+    const response = await fetch(`${API_BASE_URL}/api/conversations`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      if (data.conversation && data.conversation._id) {
+        setConversationId(data.conversation._id);
       }
-    } catch (error) {
-      console.error("Error sending message:", error);
-      const newMsg = {
-        id: messages.length + 1,
-        text: newMessage,
-        sender: loggedInUser._id,
-        createdAt: new Date(),
-      };
-      setMessages([...messages, newMsg]);
+      setMessages(data.conversation.messages);
       setNewMessage("");
+      setReplyTo(null); // clear reply after sending
+      if (!chatUsers.find((user) => user.id === activeChat.id)) {
+        const updatedUser = await fetchConversationForFollower(activeChat);
+        if (updatedUser.messages.length > 0) {
+          setChatUsers((prev) => [...prev, updatedUser]);
+        }
+      }
+    } else {
+      console.error("Failed to send message:", response.status);
     }
-  };
+  } catch (error) {
+    console.error("Error sending message:", error);
+    const newMsg = {
+      id: messages.length + 1,
+      text: newMessage,
+      sender: loggedInUser._id,
+      createdAt: new Date(),
+      replyTo: replyTo || null,
+    };
+    setMessages([...messages, newMsg]);
+    setNewMessage("");
+    setReplyTo(null); // clear reply even on error fallback
+  }
+};
+
 
   // Function for deleting an individual message using pull
   const deleteMessage = async (messageId) => {
@@ -399,6 +415,19 @@ const ChatInterface = ({ loggedInUser }) => {
     } catch (error) {
       console.error("Error sending image message:", error);
     }
+  };
+
+  const addEmoji = (emoji) => {
+    setNewMessage((prev) => prev + emoji.native);
+    setShowEmojiPicker(false);
+  };
+
+  const handleReply = (msg) => {
+    setReplyTo(msg);
+  };
+
+  const cancelReply = () => {
+    setReplyTo(null);
   };
 
   useEffect(() => {
@@ -486,143 +515,102 @@ const ChatInterface = ({ loggedInUser }) => {
                     <div
                       key={messageId}
                       className={`message-row ${isSent ? "sent-row" : "received-row"}`}
-                      style={{ position: "relative" }}
                     >
-                      {isSent ? (
-                        <>
-                          <div className="sent" style={{ position: "relative" }}>
-                            {/* 3-dots icon for sent messages: left inside bubble */}
+                      {!isSent && (
+                        <Avatar
+                          src={activeChat.profileImage}
+                          className="message-avatar"
+                        />
+                      )}
+                      <div className={isSent ? "sent" : "received"}>
+                        {/* --- Instagram-style reply preview above bubble --- */}
+                        {msg.replyTo && (
+                          <div className="insta-reply-preview">
+                            <div className="insta-reply-author">
+                              {msg.replyTo.sender === loggedInUser._id
+                                ? "You"
+                                : activeChat?.name || "User"}
+                            </div>
+                            <div className="insta-reply-text">
+                              {msg.replyTo.messageType === "image" 
+                                ? "📷 Photo"
+                                : msg.replyTo.text
+                                ? msg.replyTo.text.length > 40
+                                  ? msg.replyTo.text.slice(0, 40) + "..."
+                                  : msg.replyTo.text
+                                : "Media"}
+                            </div>
+                          </div>
+                        )}
+                        {/* --- End reply preview --- */}
+                        <div className="bubble-content">
+                          {/* Three dots menu and message content as before */}
+                          <div className="message-options">
                             <IconButton
                               size="small"
-                              style={{
-                                position: "absolute",
-                                left: 8,
-                                top: 8,
-                                zIndex: 2,
-                              }}
                               onClick={() =>
                                 setShowDeleteFor(showDeleteFor === messageId ? null : messageId)
                               }
                             >
-                              <MoreVertIcon fontSize="small" />
+                              <MoreVertIcon fontSize="small" style={{ color: isSent ? '#fff' : '#666' }} />
                             </IconButton>
                             {showDeleteFor === messageId && (
-                              <IconButton
-                                onClick={() => {
-                                  deleteMessage(msg._id);
-                                  setShowDeleteFor(null);
-                                }}
-                                size="small"
-                                color="error"
+                              <div
+                                className={`delete-dropdown ${isSent ? "left" : "right"}`}
                                 style={{
-                                  position: "absolute",
-                                  left: 8,
-                                  top: 40,
-                                  background: "white",
-                                  zIndex: 10,
+                                  animation: "dropdownIn 0.25s cubic-bezier(.4,2,.6,1) both"
                                 }}
                               >
-                                <DeleteIcon fontSize="small" />
-                              </IconButton>
-                            )}
-                            {msg.messageType === "image" || isImageUrl(msg.text) ? (
-                              <div className="image-container" onClick={() => handlePostClick(msg)}>
-                                <img
-                                  src={msg.imageUrl || msg.text}
-                                  alt="shared content"
-                                  className="chat-image"
-                                  style={{
-                                    maxWidth: 120,
-                                    maxHeight: 120,
-                                    borderRadius: 8,
-                                    cursor: 'pointer'
+                                <div className="dropdown-arrow" />
+                                <button
+                                  className="delete-dropdown-btn"
+                                  onClick={() => {
+                                    deleteMessage(msg._id);
+                                    setShowDeleteFor(null);
                                   }}
-                                />
-                                {msg.post && (
-                                  <div className="image-overlay">
-                                    <span>View Post</span>
-                                  </div>
-                                )}
-                              </div>
-                            ) : (
-                              <span>{msg.text}</span>
-                            )}
-                            <div className="message-time">
-                              {formatRelativeTime(msg.createdAt)}
-                            </div>
-                          </div>
-                          <Avatar
-                            src={loggedInUser.profileImage}
-                            className="message-avatar"
-                          />
-                        </>
-                      ) : (
-                        <>
-                          <Avatar
-                            src={activeChat.profileImage}
-                            className="message-avatar"
-                          />
-                          <div className="received" style={{ position: "relative" }}>
-                            <IconButton
-                              size="small"
-                              style={{
-                                position: "absolute",
-                                right: 8,
-                                top: 8,
-                                zIndex: 2,
-                              }}
-                              onClick={() =>
-                                setShowDeleteFor(showDeleteFor === messageId ? null : messageId)
-                              }
-                            >
-                              <MoreVertIcon fontSize="small" />
-                            </IconButton>
-                            {showDeleteFor === messageId && (
-                              <IconButton
-                                onClick={() => {
-                                  deleteMessage(msg._id);
-                                  setShowDeleteFor(null);
-                                }}
-                                size="small"
-                                color="error"
-                                style={{
-                                  position: "absolute",
-                                  right: 8,
-                                  top: 40,
-                                  background: "white",
-                                  zIndex: 10,
-                                }}
-                              >
-                                <DeleteIcon fontSize="small" />
-                              </IconButton>
-                            )}
-                            {msg.messageType === "image" || isImageUrl(msg.text) ? (
-                              <div className="image-container" onClick={() => handlePostClick(msg)}>
-                                <img
-                                  src={msg.imageUrl || msg.text}
-                                  alt="shared content"
-                                  className="chat-image"
-                                  style={{
-                                    maxWidth: 120,
-                                    maxHeight: 120,
-                                    borderRadius: 8,
-                                    cursor: 'pointer'
+                                >
+                                  <DeleteIcon fontSize="small" />
+                                  <span>Delete</span>
+                                </button>
+                                <button
+                                  className="delete-dropdown-btn"
+                                  onClick={() => {
+                                    handleReply(msg);
+                                    setShowDeleteFor(null);
                                   }}
-                                />
-                                {msg.post && (
-                                  <div className="image-overlay">
-                                    <span>View Post</span>
-                                  </div>
-                                )}
+                                >
+                                  💬 <span>Reply</span>
+                                </button>
                               </div>
-                            ) : (
-                              <span>{msg.text}</span>
                             )}
-                            <div className="message-time">
-                              {formatRelativeTime(msg.createdAt)}
-                            </div>
                           </div>
-                        </>
+                          {/* Message content */}
+                          {msg.messageType === "image" || isImageUrl(msg.text) ? (
+                            <div className="image-container" onClick={() => handlePostClick(msg)}>
+                              <img
+                                src={msg.imageUrl || msg.text}
+                                alt="shared content"
+                                className="chat-image"
+                              />
+                              {msg.post && (
+                                <div className="image-overlay">
+                                  <span>View Post</span>
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <span>{msg.text}</span>
+                          )}
+                          <div className="message-timestamp">
+                            {formatRelativeTime(msg.createdAt)}
+                          </div>
+                        </div>
+                      </div>
+                      {isSent && (
+                        <Avatar
+                          src={loggedInUser.profileImage}
+                          className="message-avatar"
+                        />
                       )}
                     </div>
                   );
@@ -631,7 +619,30 @@ const ChatInterface = ({ loggedInUser }) => {
                 <div className="no-messages">Start a convo!</div>
               )}
             </div>
+            {/* Reply bar */}
+            {replyTo && (
+              <div className="reply-bar">
+                <span>Replying to: {replyTo.text || "Media"}</span>
+                <IconButton size="small" onClick={cancelReply}>
+                  <CloseIcon fontSize="small" />
+                </IconButton>
+              </div>
+            )}
+            {/* Chat input with emoji */}
             <div className="chat-input">
+              <button
+                type="button"
+                className="emoji-btn"
+                onClick={() => setShowEmojiPicker((v) => !v)}
+                style={{ marginRight: 8, fontSize: 22, background: "none", border: "none", cursor: "pointer" }}
+              >
+                😊
+              </button>
+              {showEmojiPicker && (
+                <div style={{ position: "absolute", bottom: 60, left: 20, zIndex: 100 }}>
+                  <Picker onEmojiSelect={addEmoji} theme="light" />
+                </div>
+              )}
               <input
                 type="text"
                 placeholder="Type a message..."

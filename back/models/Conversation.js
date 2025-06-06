@@ -5,6 +5,14 @@ const messageSchema = new mongoose.Schema({
   text: { type: String, required: true },
   messageType: { type: String, enum: ['text', 'image'], default: 'text' },
   imageUrl: String,
+  // Add replyTo field
+  replyTo: {
+    _id: { type: mongoose.Schema.Types.ObjectId },
+    sender: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    text: String,
+    messageType: String,
+    imageUrl: String
+  },
   post: {
     _id: { type: mongoose.Schema.Types.ObjectId, ref: 'Post' },
     imageUrl: String,

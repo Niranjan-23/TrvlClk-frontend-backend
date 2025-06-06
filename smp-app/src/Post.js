@@ -168,7 +168,9 @@ const Post = ({ post, loggedInUser, showCommentsByDefault = false }) => {
                 className="post-location"
                 onClick={() => navigate('/map', {
                   state: {
-                    location: post.location, // Only pass the location string
+                    location: post.location,
+                    latitude: post.latitude,
+                    longitude: post.longitude,
                   },
                 })}
                 style={{ cursor: "pointer", color: "#1976d2", textDecoration: "underline" }}
@@ -176,8 +178,6 @@ const Post = ({ post, loggedInUser, showCommentsByDefault = false }) => {
                 <LocationOnIcon fontSize="small" /> {post.location}
               </p>
             )}
-
-
           </div>
         </div>
       </div>
